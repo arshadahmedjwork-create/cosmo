@@ -19,78 +19,62 @@ const Navbar = () => {
   }, [location]);
 
   const navLinks = [
-    { label: "Collections", href: "/" },
-    { label: "Materials", href: "/" },
-    { label: "Applications", href: "/" },
-    { label: "About", href: "/" },
-    { label: "Contact", href: "/" },
+    { label: "Collections", href: "#collections" },
+    { label: "Materials", href: "#materials" },
+    { label: "About", href: "#about" },
+    { label: "Contact", href: "#contact" },
   ];
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-background/95 backdrop-blur-md border-b border-border"
+          ? "bg-background/95 backdrop-blur-md"
           : "bg-transparent"
       }`}
     >
-      <nav className="flex items-center justify-between section-padding h-20 md:h-24">
-        <Link to="/" className="flex items-center gap-3 shrink-0">
-          <img src={cosmoLogo} alt="Cosmo Stone" className="h-10 md:h-12 w-auto" />
+      <nav className="flex items-center justify-between px-6 md:px-10 h-16 md:h-20">
+        <Link to="/" className="shrink-0 z-10">
+          <img src={cosmoLogo} alt="Cosmo Stone" className="h-8 md:h-10 w-auto" />
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link
+            <a
               key={link.label}
-              to={link.href}
-              className="label-text hover:text-foreground transition-colors duration-300"
+              href={link.href}
+              className="text-xs uppercase tracking-[0.15em] font-medium text-foreground/60 hover:text-foreground transition-colors duration-300"
+              style={{ fontFamily: "Inter, sans-serif" }}
             >
               {link.label}
-            </Link>
+            </a>
           ))}
-        </div>
-
-        <div className="hidden md:flex items-center gap-6">
-          <Link
-            to="/"
-            className="label-text bg-primary text-primary-foreground px-6 py-3 rounded hover:opacity-90 transition-opacity duration-300"
-          >
-            Request Sample
-          </Link>
         </div>
 
         {/* Mobile toggle */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-foreground"
+          className="md:hidden p-2 text-foreground z-10"
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </nav>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-background border-t border-border animate-fade-in">
-          <div className="flex flex-col px-6 py-8 gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.href}
-                className="label-text text-base hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              to="/"
-              className="label-text bg-primary text-primary-foreground px-6 py-3 rounded text-center mt-4"
+        <div className="md:hidden fixed inset-0 bg-background z-40 flex flex-col items-center justify-center gap-8 animate-fade-in">
+          {navLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className="font-serif text-3xl text-foreground hover:text-accent transition-colors"
             >
-              Request Sample
-            </Link>
-          </div>
+              {link.label}
+            </a>
+          ))}
         </div>
       )}
     </header>
