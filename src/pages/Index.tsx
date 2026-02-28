@@ -1,18 +1,18 @@
 import Navbar from "@/components/Navbar";
-import HeroSection from "@/components/HeroSection";
-import ColorFamilies from "@/components/ColorFamilies";
-import CollectionExplorer from "@/components/CollectionExplorer";
-import FeaturedSection from "@/components/FeaturedSection";
+import ScatteredHero from "@/components/ScatteredHero";
+import DragCollections from "@/components/DragCollections";
+import MaterialsGrid from "@/components/MaterialsGrid";
+import AboutSection from "@/components/AboutSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
     <div className="bg-background min-h-screen">
       <Navbar />
-      <HeroSection />
-      <ColorFamilies />
-      <CollectionExplorer />
-      <FeaturedSection />
+      <ScatteredHero />
+      <DragCollections />
+      <MaterialsGrid />
+      <AboutSection />
       <Footer />
     </div>
   );
