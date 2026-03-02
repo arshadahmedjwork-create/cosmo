@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 
-import cremaNova from "@/assets/stones/crema-nova.webp";
-import cloudyBeige from "@/assets/stones/cloudy-beige.webp";
-import bresciaDiana from "@/assets/stones/brescia-diana.webp";
-import bresciaAurora from "@/assets/stones/brescia-aurora.webp";
+import cremaNova from "@/assets/images/BEIGES AND CREAM/Crema-Nova-min-min.jpeg";
+import cloudyBeige from "@/assets/images/BEIGES AND CREAM/Cloudy-Beige-min-min.jpeg";
+import bresciaDiana from "@/assets/images/BEIGES AND CREAM/Bresica-Diana-min.jpg";
+import bresciaAurora from "@/assets/images/BEIGES AND CREAM/Brescia-Aurora-min.jpg";
 
 const stones = [
   { name: "Crema Nova", type: "Polished", image: cremaNova },

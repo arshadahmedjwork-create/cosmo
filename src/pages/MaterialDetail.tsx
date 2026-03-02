@@ -5,13 +5,13 @@ import { motion } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-import cremaNova from "@/assets/stones/crema-nova.webp";
-import cloudyBeige from "@/assets/stones/cloudy-beige.webp";
-import bresciaDiana from "@/assets/stones/brescia-diana.webp";
-import bresciaAurora from "@/assets/stones/brescia-aurora.webp";
-import botticino from "@/assets/stones/botticino-classico.webp";
-import biancoMarfil from "@/assets/stones/bianco-marfil.webp";
-import atlanticBeige from "@/assets/stones/atlantic-beige.webp";
+import cremaNova from "@/assets/images/BEIGES AND CREAM/Crema-Nova-min-min.jpeg";
+import cloudyBeige from "@/assets/images/BEIGES AND CREAM/Cloudy-Beige-min-min.jpeg";
+import bresciaDiana from "@/assets/images/BEIGES AND CREAM/Bresica-Diana-min.jpg";
+import bresciaAurora from "@/assets/images/BEIGES AND CREAM/Brescia-Aurora-min.jpg";
+import botticino from "@/assets/images/BEIGES AND CREAM/Botticino-Classico-min-min.jpeg";
+import biancoMarfil from "@/assets/images/BEIGES AND CREAM/Bianco-Marfill-min.jpg";
+import atlanticBeige from "@/assets/images/BEIGES AND CREAM/Atlantic-min.jpg";
 
 const materialsData: Record<string, { name: string; variant: string; finish: string; category: string; image: string; description: string; products: number }> = {
   "crema-nova": { name: "Crema", variant: "Nova", finish: "Polished", category: "Beige & Cream", image: cremaNova, description: "A classic cream marble with subtle, elegant veining. Its warm undertones create bright, inviting interiors that feel both luxurious and welcoming.", products: 6 },
@@ -98,11 +98,10 @@ const MaterialDetail = () => {
                   <button
                     key={f}
                     onClick={() => setActiveFinish(f)}
-                    className={`label-text px-5 py-2.5 rounded-full border transition-all duration-300 ${
-                      activeFinish === f
+                    className={`label-text px-5 py-2.5 rounded-full border transition-all duration-300 ${activeFinish === f
                         ? "bg-primary text-primary-foreground border-primary"
                         : "border-border hover:border-foreground/30"
-                    }`}
+                      }`}
                   >
                     {f}
                   </button>
@@ -116,11 +115,10 @@ const MaterialDetail = () => {
                   <button
                     key={t}
                     onClick={() => setActiveThickness(t)}
-                    className={`label-text px-5 py-2.5 rounded-full border transition-all duration-300 ${
-                      activeThickness === t
+                    className={`label-text px-5 py-2.5 rounded-full border transition-all duration-300 ${activeThickness === t
                         ? "bg-primary text-primary-foreground border-primary"
                         : "border-border hover:border-foreground/30"
-                    }`}
+                      }`}
                   >
                     {t}
                   </button>

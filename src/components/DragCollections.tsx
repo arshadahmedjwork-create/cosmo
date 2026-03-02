@@ -3,13 +3,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { MoveHorizontal } from "lucide-react";
 
-import cremaNova from "@/assets/stones/crema-nova.webp";
-import cloudyBeige from "@/assets/stones/cloudy-beige.webp";
-import bresciaDiana from "@/assets/stones/brescia-diana.webp";
-import bresciaAurora from "@/assets/stones/brescia-aurora.webp";
-import botticino from "@/assets/stones/botticino-classico.webp";
-import biancoMarfil from "@/assets/stones/bianco-marfil.webp";
-import atlanticBeige from "@/assets/stones/atlantic-beige.webp";
+import cremaNova from "@/assets/images/BEIGES AND CREAM/Crema-Nova-min-min.jpeg";
+import cloudyBeige from "@/assets/images/BEIGES AND CREAM/Cloudy-Beige-min-min.jpeg";
+import bresciaDiana from "@/assets/images/BEIGES AND CREAM/Bresica-Diana-min.jpg";
+import bresciaAurora from "@/assets/images/BEIGES AND CREAM/Brescia-Aurora-min.jpg";
+import botticino from "@/assets/images/BEIGES AND CREAM/Botticino-Classico-min-min.jpeg";
+import biancoMarfil from "@/assets/images/BEIGES AND CREAM/Bianco-Marfill-min.jpg";
+import atlanticBeige from "@/assets/images/BEIGES AND CREAM/Atlantic-min.jpg";
 
 const collections = [
   {
@@ -181,9 +181,8 @@ const DragCollections = () => {
         {collections.map((_, i) => (
           <div
             key={i}
-            className={`h-1 rounded-full transition-all duration-500 ${
-              i === activeIndex ? "w-8 bg-foreground" : "w-2 bg-foreground/20"
-            }`}
+            className={`h-1 rounded-full transition-all duration-500 ${i === activeIndex ? "w-8 bg-foreground" : "w-2 bg-foreground/20"
+              }`}
           />
         ))}
       </div>

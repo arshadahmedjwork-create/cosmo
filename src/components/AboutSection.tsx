@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import biancoMarfil from "@/assets/stones/bianco-marfil.webp";
+import biancoMarfil from "@/assets/images/BEIGES AND CREAM/Bianco-Marfill-min.jpg";
 
 const AboutSection = () => {
   return (
