@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Menu, Settings2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, Settings2, X } from "lucide-react";
 import MarbleSidebar, { StoneDetail } from "./MarbleSidebar";
 
 import atlantic from "@/assets/images/BEIGES AND CREAM/Atlantic-min.jpg";
@@ -164,181 +164,434 @@ const stonesData: StoneDetail[] = [
 ];
 
 function radiusFor(size: number) {
-  if (size <= 28) return 4;
-  if (size <= 44) return 6;
-  if (size <= 74) return 8;
-  if (size <= 110) return 12;
-  return 16;
+  if (size <= 80) return 14;
+  if (size <= 110) return 18;
+  if (size <= 140) return 20;
+  return 22;
 }
 
-export const PATTERN_WIDTH = 892;
-export const PATTERN_HEIGHT = 567;
+export const PATTERN_WIDTH = 1400;
+export const PATTERN_HEIGHT = 1280;
 
-// Non-overlapping rounded-square layout inspired by the provided reference.
+// 70 unique, evenly-spaced positions — no tiling, no crowding
 const blocks = [
-  // Row 1
-  { x: 20, y: 30, size: 44 },
-  { x: 76, y: 18, size: 72 },
-  { x: 160, y: 18, size: 40 },
-  { x: 228, y: 24, size: 38 },
-  { x: 278, y: 44, size: 24 },
-  { x: 312, y: 44, size: 70 },
-  { x: 396, y: 14, size: 94 },
-  { x: 506, y: 18, size: 70 },
-  { x: 602, y: 16, size: 58 },
-  { x: 676, y: 16, size: 76 },
-  { x: 790, y: 24, size: 44 },
-
-  // Row 2
-  { x: 26, y: 102, size: 34 },
-  { x: 90, y: 104, size: 28 },
-  { x: 164, y: 76, size: 50 },
-  { x: 240, y: 102, size: 64 },
-  { x: 322, y: 140, size: 50 },
-  { x: 414, y: 132, size: 28 },
-  { x: 502, y: 124, size: 28 },
-  { x: 538, y: 140, size: 72 },
-  { x: 646, y: 110, size: 72 },
-  { x: 728, y: 132, size: 38 },
-  { x: 776, y: 124, size: 54 },
-
-  // Row 3
-  { x: 16, y: 152, size: 56 },
-  { x: 90, y: 146, size: 72 },
-  { x: 176, y: 162, size: 56 },
-  { x: 240, y: 208, size: 106 },
-  { x: 364, y: 202, size: 38 },
-  { x: 418, y: 172, size: 96 },
-  { x: 530, y: 246, size: 24 },
-  { x: 562, y: 230, size: 56 },
-  { x: 638, y: 230, size: 40 },
-  { x: 714, y: 204, size: 162 },
-
-  // Row 4
-  { x: 20, y: 286, size: 54 },
-  { x: 92, y: 298, size: 38 },
-  { x: 162, y: 308, size: 72 },
-  { x: 252, y: 344, size: 56 },
-  { x: 320, y: 354, size: 32 },
-  { x: 380, y: 328, size: 40 },
-  { x: 456, y: 298, size: 64 },
-  { x: 540, y: 298, size: 38 },
-  { x: 610, y: 306, size: 74 },
-
-  // Row 5
-  { x: 30, y: 418, size: 24 },
-  { x: 62, y: 400, size: 58 },
-  { x: 134, y: 412, size: 54 },
-  { x: 194, y: 460, size: 28 },
-  { x: 230, y: 414, size: 110 },
-  { x: 356, y: 386, size: 44 },
-  { x: 428, y: 372, size: 58 },
-  { x: 510, y: 412, size: 28 },
-  { x: 582, y: 412, size: 54 },
-  { x: 676, y: 392, size: 72 },
-  { x: 818, y: 408, size: 40 },
-
-  // Row 6
-  { x: 32, y: 476, size: 40 },
-  { x: 86, y: 476, size: 40 },
-  { x: 140, y: 484, size: 42 },
-  { x: 356, y: 444, size: 56 },
-  { x: 430, y: 468, size: 54 },
-  { x: 520, y: 468, size: 56 },
-  { x: 588, y: 484, size: 42 },
-  { x: 676, y: 466, size: 42 },
-  { x: 818, y: 474, size: 44 },
+  // Row 1  (y ~10-80)
+  { x: 10, y: 25, size: 85 },
+  { x: 130, y: 8, size: 150 },
+  { x: 310, y: 20, size: 95 },
+  { x: 435, y: 5, size: 125 },
+  { x: 590, y: 18, size: 80 },
+  { x: 700, y: 10, size: 140 },
+  { x: 872, y: 22, size: 65 },
+  { x: 962, y: 8, size: 130 },
+  { x: 1122, y: 15, size: 90 },
+  { x: 1240, y: 5, size: 145 },
+  // Row 2  (y ~185-260)
+  { x: 8, y: 195, size: 135 },
+  { x: 178, y: 182, size: 75 },
+  { x: 285, y: 197, size: 120 },
+  { x: 435, y: 190, size: 60 },
+  { x: 525, y: 180, size: 145 },
+  { x: 700, y: 198, size: 85 },
+  { x: 815, y: 185, size: 110 },
+  { x: 955, y: 195, size: 140 },
+  { x: 1125, y: 183, size: 70 },
+  { x: 1228, y: 190, size: 130 },
+  // Row 3  (y ~375-445)
+  { x: 12, y: 378, size: 110 },
+  { x: 152, y: 370, size: 90 },
+  { x: 272, y: 382, size: 145 },
+  { x: 448, y: 370, size: 65 },
+  { x: 543, y: 378, size: 130 },
+  { x: 703, y: 368, size: 100 },
+  { x: 833, y: 380, size: 145 },
+  { x: 1008, y: 370, size: 80 },
+  { x: 1118, y: 380, size: 135 },
+  { x: 1283, y: 370, size: 95 },
+  // Row 4  (y ~555-630)
+  { x: 10, y: 563, size: 80 },
+  { x: 125, y: 555, size: 140 },
+  { x: 297, y: 568, size: 110 },
+  { x: 438, y: 557, size: 125 },
+  { x: 594, y: 565, size: 70 },
+  { x: 698, y: 555, size: 155 },
+  { x: 882, y: 568, size: 80 },
+  { x: 993, y: 557, size: 120 },
+  { x: 1143, y: 563, size: 140 },
+  { x: 1315, y: 555, size: 75 },
+  // Row 5  (y ~745-815)
+  { x: 15, y: 748, size: 120 },
+  { x: 168, y: 740, size: 85 },
+  { x: 288, y: 750, size: 145 },
+  { x: 466, y: 742, size: 70 },
+  { x: 570, y: 750, size: 115 },
+  { x: 718, y: 740, size: 80 },
+  { x: 832, y: 750, size: 140 },
+  { x: 1006, y: 742, size: 65 },
+  { x: 1105, y: 750, size: 130 },
+  { x: 1270, y: 740, size: 110 },
+  // Row 6  (y ~930-1000)
+  { x: 12, y: 932, size: 100 },
+  { x: 145, y: 925, size: 145 },
+  { x: 323, y: 935, size: 80 },
+  { x: 436, y: 925, size: 130 },
+  { x: 598, y: 932, size: 65 },
+  { x: 697, y: 925, size: 125 },
+  { x: 855, y: 935, size: 90 },
+  { x: 978, y: 925, size: 140 },
+  { x: 1150, y: 932, size: 80 },
+  { x: 1265, y: 925, size: 120 },
+  // Row 7  (y ~1110-1170)
+  { x: 15, y: 1115, size: 85 },
+  { x: 135, y: 1108, size: 130 },
+  { x: 300, y: 1118, size: 105 },
+  { x: 438, y: 1110, size: 90 },
+  { x: 562, y: 1118, size: 145 },
+  { x: 742, y: 1108, size: 70 },
+  { x: 848, y: 1118, size: 130 },
+  { x: 1010, y: 1110, size: 100 },
+  { x: 1145, y: 1118, size: 140 },
+  { x: 1320, y: 1108, size: 80 },
 ];
+
+const MIN_ZOOM = 1.0;  // default view is min — can't zoom out below default
+const MAX_ZOOM = 1.4;  // one click from default
+const ZOOM_STEP = 0.4; // single step covers full range
 
 const SwatchHero = () => {
   const [selectedStone, setSelectedStone] = useState<StoneDetail | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Get unique categories for the filter dropdown
+  // ── Zoom (starts at 0.85 for cinematic zoom-in, then animates to MIN_ZOOM=1.0)
+  const [zoomLevel, setZoomLevel] = useState(0.85);
+  const zoomRef = useRef(zoomLevel);
+  zoomRef.current = zoomLevel;
+
+  // ── Pan state (synced from drag)
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const panRef = useRef({ x: 0, y: 0 });
+
+  // ── Drag refs (no state for perf — directly update DOM during drag)
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ mx: 0, my: 0, panX: 0, panY: 0 });
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // ── Cursor label state
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const [hoveredStone, setHoveredStone] = useState<StoneDetail | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Auto zoom-in on mount: 0.85 → 1.0 over 1.4s
+  useEffect(() => {
+    const timer = setTimeout(() => setZoomLevel(MIN_ZOOM), 80);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Zoom handlers
+  const zoomIn = () => setZoomLevel(z => Math.min(+(z + ZOOM_STEP).toFixed(2), MAX_ZOOM));
+  const zoomOut = () => {
+    const next = Math.max(+(zoomLevel - ZOOM_STEP).toFixed(2), MIN_ZOOM);
+    setZoomLevel(next);
+    // Reset pan when back at default
+    if (next <= MIN_ZOOM) {
+      panRef.current = { x: 0, y: 0 };
+      setPanX(0);
+      setPanY(0);
+      if (canvasRef.current) {
+        canvasRef.current.style.transition = "transform 0.6s cubic-bezier(0.16,1,0.3,1)";
+        canvasRef.current.style.transform = `translate(0px, 0px) scale(${MIN_ZOOM})`;
+      }
+    }
+  };
+
+  // ── Drag-to-pan handlers (direct DOM mutation — no re-renders during drag)
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    // Only pan when zoomed in, and ignore clicks on buttons/links
+    if (zoomRef.current <= MIN_ZOOM) return;
+    if ((e.target as HTMLElement).closest('button,a')) return;
+    isDraggingRef.current = true;
+    dragStartRef.current = { mx: e.clientX, my: e.clientY, panX: panRef.current.x, panY: panRef.current.y };
+    if (canvasRef.current) {
+      canvasRef.current.style.transition = 'none';
+      canvasRef.current.style.cursor = 'grabbing';
+    }
+    e.preventDefault();
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    setCursorPos({ x: e.clientX, y: e.clientY });
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartRef.current.mx;
+    const dy = e.clientY - dragStartRef.current.my;
+    const newX = dragStartRef.current.panX + dx;
+    const newY = dragStartRef.current.panY + dy;
+    panRef.current = { x: newX, y: newY };
+    if (canvasRef.current) {
+      canvasRef.current.style.transform =
+        `translate(${newX}px, ${newY}px) scale(${zoomRef.current})`;
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    // Sync DOM position back to React state
+    setPanX(panRef.current.x);
+    setPanY(panRef.current.y);
+    if (canvasRef.current) {
+      canvasRef.current.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
+      canvasRef.current.style.cursor = '';
+    }
+  }, []);
+
+  // Sync panX/panY state → DOM when zoom changes (smooth transition)
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    canvasRef.current.style.transition = 'transform 1.4s cubic-bezier(0.16,1,0.3,1)';
+    canvasRef.current.style.transform =
+      `translate(${panRef.current.x}px, ${panRef.current.y}px) scale(${zoomLevel})`;
+  }, [zoomLevel]);
+
+  // Categories for filter
   const categories = ["All", ...Array.from(new Set(stonesData.map(s => s.category)))];
-
-  // Function to convert SVG coordinates to responsive percentages
   const toPct = (val: number, max: number) => `${(val / max) * 100}%`;
-
-  // Calculate total height needed based on number of stones to tile the pattern downwards
   const numRows = Math.ceil(stonesData.length / blocks.length);
   const totalHeight = PATTERN_HEIGHT * numRows;
 
   return (
-    <section className="relative w-full h-screen min-h-[600px] overflow-auto bg-[#e5e5e5] select-none pt-24 pb-16">
-      <div className="flex w-full items-center justify-center min-h-full">
-        {/* Container maintaining the dynamically tiled aspect ratio */}
-        <div
-          className="relative w-[95%] max-w-7xl mx-auto"
-          style={{ aspectRatio: `${PATTERN_WIDTH} / ${totalHeight}` }}
-        >
-          {stonesData.map((stone, i) => {
-            const b = blocks[i % blocks.length];
-            const rowOffset = Math.floor(i / blocks.length) * PATTERN_HEIGHT;
-            const isFilteredOut = activeCategory !== "All" && stone.category !== activeCategory;
+    <section
+      ref={sectionRef}
+      className="relative w-full h-screen min-h-[600px] overflow-hidden select-none pt-24 pb-16"
+      style={{
+        background: "#efefec",
+        cursor: zoomLevel > MIN_ZOOM ? "grab" : "default",
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+    >
+      {/* ── Cursor-following stone name label ─────────────────────── */}
+      <AnimatePresence>
+        {hoveredStone && (
+          <motion.div
+            key="cursor-label"
+            className="fixed pointer-events-none z-[100]"
+            style={{ left: cursorPos.x + 18, top: cursorPos.y - 14 }}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <span
+              className="flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium tracking-wide text-white"
+              style={{
+                background: "rgba(30,20,10,0.82)",
+                backdropFilter: "blur(6px)",
+                borderRadius: 3,
+                whiteSpace: "nowrap",
+                letterSpacing: "0.03em",
+              }}
+            >
+              <span className="text-white/60 mr-0.5">+</span>
+              {hoveredStone.name}
+            </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            return (
-              <motion.div
-                key={i}
-                className="absolute overflow-hidden cursor-pointer bg-stone-200 group"
-                whileHover={{
-                  scale: 1.05,
-                  y: -4,
-                  boxShadow: "0 12px 24px rgba(0,0,0,0.12)",
-                  zIndex: 10
-                }}
-                onClick={() => setSelectedStone(stone)}
-                animate={{
-                  opacity: isFilteredOut ? 0.15 : 1,
-                  scale: 1,
-                  y: 0,
-                  // Apply a grayscale filter if excluded for better visual hierarchy
-                  filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)"
-                }}
-                transition={{
-                  duration: 0.5,
-                  delay: i * 0.02,
-                  ease: [0.16, 1, 0.3, 1]
-                }}
-                style={{
-                  left: toPct(b.x, PATTERN_WIDTH),
-                  top: toPct(b.y + rowOffset, totalHeight),
-                  width: toPct(b.size, PATTERN_WIDTH),
-                  height: toPct(b.size, totalHeight),
-                  borderRadius: `${radiusFor(b.size)}px`,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                  pointerEvents: isFilteredOut ? "none" : "auto", // prevent clicking filtered out items
-                }}
-              >
-                <motion.img
-                  src={stone.image}
-                  alt={stone.name}
-                  className="w-full h-full object-cover transition-transform duration-700"
-                  whileHover={{ scale: 1.15 }}
-                />
-              </motion.div>
-            );
-          })}
+      <div className="flex w-full items-center justify-center min-h-full">
+        {/* Zoom + pan wrapper — controlled directly via canvasRef for performance */}
+        <div
+          ref={canvasRef}
+          style={{
+            transform: `translate(${panX}px, ${panY}px) scale(${zoomLevel})`,
+            transformOrigin: "center center",
+            transition: "transform 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            willChange: "transform",
+          }}
+        >
+          {/* Container maintaining the dynamically tiled aspect ratio */}
+          <div
+            className="relative w-[95%] max-w-7xl mx-auto"
+            style={{ aspectRatio: `${PATTERN_WIDTH} / ${totalHeight}` }}
+          >
+            {stonesData.map((stone, i) => {
+              const b = blocks[i % blocks.length];
+              const rowOffset = Math.floor(i / blocks.length) * PATTERN_HEIGHT;
+              const isFilteredOut = activeCategory !== "All" && stone.category !== activeCategory;
+
+              return (
+                <motion.div
+                  key={i}
+                  className="absolute overflow-hidden cursor-pointer"
+                  whileHover={{
+                    scale: 1.02,
+                    y: -5,
+                    boxShadow: "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30)",
+                    zIndex: 10,
+                    transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
+                  }}
+                  onClick={() => setSelectedStone(stone)}
+                  onMouseEnter={() => setHoveredStone(stone)}
+                  onMouseLeave={() => setHoveredStone(null)}
+                  animate={{
+                    opacity: isFilteredOut ? 0.15 : 1,
+                    scale: 1,
+                    y: 0,
+                    filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)"
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    delay: i * 0.02,
+                    ease: [0.16, 1, 0.3, 1]
+                  }}
+                  style={{
+                    left: toPct(b.x, PATTERN_WIDTH),
+                    top: toPct(b.y + rowOffset, totalHeight),
+                    width: toPct(b.size, PATTERN_WIDTH),
+                    height: toPct(b.size, totalHeight),
+                    borderRadius: `${radiusFor(b.size)}px`,
+                    // Directional shadow: dark, bottom-right only — no glow
+                    boxShadow: "6px 6px 14px rgba(0,0,0,0.50), 12px 12px 24px rgba(0,0,0,0.35)",
+                    // Glass border: subtle light edge
+                    border: "1px solid rgba(255,255,255,0.18)",
+                    pointerEvents: isFilteredOut ? "none" : "auto",
+                    willChange: "transform",
+                  }}
+                >
+                  {/* Stone image */}
+                  <motion.img
+                    src={stone.image}
+                    alt={stone.name}
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.08 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  />
+                  {/* Glass sheen overlay — sits on top of image, not blocking it */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background:
+                        "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.00) 60%)",
+                      pointerEvents: "none",
+                      borderRadius: "inherit",
+                    }}
+                  />
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Bottom Center Controls */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center shadow-sm z-20">
-        <button className="flex items-center gap-2 px-6 py-3 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors border-r border-[#3a3a3a] rounded-l-md">
-          <Menu size={16} />
-          <span className="text-sm font-medium tracking-wide">menu</span>
-        </button>
+      {/* ── Bottom Center Controls (Palmer-style expandable menu) ── */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
 
-        <div className="relative">
+        {/* ── Left group: menu toggle ─────────────────────────────── */}
+        <div className="flex items-center">
+          <AnimatePresence mode="wait">
+            {isMenuOpen ? (
+              /* OPEN STATE ─ X + nav links */
+              <motion.div
+                key="menu-open"
+                className="flex items-center gap-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              >
+                {/* X close button */}
+                <motion.button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="w-11 h-11 flex items-center justify-center rounded-full bg-[#252525] text-white hover:bg-[#111] transition-colors shadow-sm"
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  aria-label="Close menu"
+                >
+                  <X size={15} />
+                </motion.button>
+
+                {/* Nav items with stagger */}
+                {[
+                  { label: "collections", href: "#collections", dot: true },
+                  { label: "about", href: "#about", dot: false },
+                  { label: "contact", href: "#contact", dot: false },
+                ].map((item, i) => (
+                  <motion.a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-1.5 px-5 py-2.5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.06 + i * 0.075, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {item.dot && (
+                      <span className="text-[#c8a47a] font-bold leading-none">•</span>
+                    )}
+                    {item.label}
+                  </motion.a>
+                ))}
+              </motion.div>
+            ) : (
+              /* CLOSED STATE ─ ≡ icon  +  menu text  (two separate adjacent buttons) */
+              <motion.div
+                key="menu-closed"
+                className="flex items-center gap-0"
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 8 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Hamburger icon — square dark button */}
+                <button
+                  onClick={() => setIsMenuOpen(true)}
+                  className="flex items-center justify-center w-11 h-11 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm"
+                  aria-label="Open menu"
+                >
+                  <Menu size={15} />
+                </button>
+                {/* Spacer — 2px gap between the two */}
+                <div className="w-[2px]" />
+                {/* 'menu' text — separate dark button */}
+                <button
+                  onClick={() => setIsMenuOpen(true)}
+                  className="h-11 px-5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
+                >
+                  menu
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Right group: filter icon + filter text (two separate adjacent buttons) ── */}
+        <div className="relative flex items-center gap-0">
+          {/* Filter icon — separate outlined button */}
           <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="flex items-center gap-2 px-6 py-3 bg-white text-[#252525] hover:bg-stone-50 transition-colors border border-stone-200 border-l-0 rounded-r-md"
+            onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
+            className="flex items-center justify-center w-11 h-11 bg-white text-[#252525] hover:bg-stone-50 transition-colors border border-stone-200 rounded-sm shadow-sm"
+            aria-label="Toggle filter"
           >
-            <Settings2 size={16} />
-            <span className="text-sm font-medium tracking-wide whitespace-nowrap">
-              {activeCategory === "All" ? "filter" : activeCategory}
-            </span>
+            <Settings2 size={15} />
+          </button>
+          {/* 2px gap */}
+          <div className="w-[2px]" />
+          {/* 'filter' text — separate outlined button */}
+          <button
+            onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
+            className="h-11 px-5 bg-white text-[#252525] text-[13px] font-medium tracking-wide hover:bg-stone-50 transition-colors border border-stone-200 border-l-0 rounded-sm shadow-sm whitespace-nowrap"
+          >
+            {activeCategory === "All" ? "filter" : activeCategory}
           </button>
 
           {/* Filter Dropdown */}
@@ -349,11 +602,11 @@ const SwatchHero = () => {
               y: isFilterOpen ? -8 : 0,
               pointerEvents: isFilterOpen ? "auto" : "none"
             }}
-            className="absolute bottom-full left-0 mb-2 min-w-[220px] bg-white border border-stone-100 shadow-xl rounded-md py-2 overflow-hidden"
+            className="absolute bottom-full right-0 mb-2 min-w-[220px] bg-white border border-stone-100 shadow-xl rounded-md py-2 overflow-hidden"
           >
             <div className="px-4 py-2 mt-1 mb-1 text-[11px] font-bold text-stone-400 tracking-widest uppercase flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-stone-300" />
-              Marble
+              Stone Category
             </div>
             <div className="flex flex-col">
               {categories.map((cat) => (
@@ -373,6 +626,33 @@ const SwatchHero = () => {
               ))}
             </div>
           </motion.div>
+        </div>
+      </div>
+
+      {/* ── Zoom controls — bottom right (Palmer style) ────────────── */}
+      <div className="fixed bottom-8 right-8 z-20 flex items-center gap-4">
+        <span className="text-[12px] text-stone-400 tracking-wide hidden sm:block select-none">
+          ✦ Drag to explore
+        </span>
+        <div className="flex items-center gap-2">
+          {/* − button: white circle, turns dark on press */}
+          <button
+            onClick={zoomOut}
+            disabled={zoomLevel <= MIN_ZOOM}
+            aria-label="Zoom out"
+            className="w-12 h-12 flex items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 text-xl font-light transition-all duration-150 hover:border-stone-400 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            −
+          </button>
+          {/* + button: white circle, turns dark on press */}
+          <button
+            onClick={zoomIn}
+            disabled={zoomLevel >= MAX_ZOOM}
+            aria-label="Zoom in"
+            className="w-12 h-12 flex items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 text-xl font-light transition-all duration-150 hover:border-stone-400 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            +
+          </button>
         </div>
       </div>
 
