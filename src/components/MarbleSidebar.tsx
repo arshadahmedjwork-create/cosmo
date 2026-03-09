@@ -2,15 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, ChevronRight, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export interface StoneDetail {
-    id: string;
-    name: string;
-    image: string;
-    category: string;
-    finish: string;
-    origin: string;
-    description: string;
-}
+import { StoneDetail } from "@/data/stones";
 
 interface MarbleSidebarProps {
     stone: StoneDetail | null;

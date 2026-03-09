@@ -1,272 +1,115 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, Settings2, X } from "lucide-react";
-import MarbleSidebar, { StoneDetail } from "./MarbleSidebar";
-
-import atlantic from "@/assets/images/BEIGES AND CREAM/Atlantic-min.jpg";
-import biancoMarfill from "@/assets/images/BEIGES AND CREAM/Bianco-Marfill-min.jpg";
-import botticinoClassico from "@/assets/images/BEIGES AND CREAM/Botticino-Classico-min-min.jpeg";
-import botticinoFiorito from "@/assets/images/BEIGES AND CREAM/Botticino-Fiorito-min-min.jpeg";
-import bresciaAurora from "@/assets/images/BEIGES AND CREAM/Brescia-Aurora-min.jpg";
-import bresicaDiana from "@/assets/images/BEIGES AND CREAM/Bresica-Diana-min.jpg";
-import cloudyBeige from "@/assets/images/BEIGES AND CREAM/Cloudy-Beige-min-min.jpeg";
-import cremaMiele from "@/assets/images/BEIGES AND CREAM/Crema-Miele-min-min.jpeg";
-import cremaNova from "@/assets/images/BEIGES AND CREAM/Crema-Nova-min-min.jpeg";
-import cremeRosso from "@/assets/images/BEIGES AND CREAM/Creme-Rosso-min.jpg";
-import dianeRoyale from "@/assets/images/BEIGES AND CREAM/Diane-Royale-min.jpg";
-import featherGrey from "@/assets/images/BEIGES AND CREAM/Feather-Grey-min.jpg";
-import irishBeigeExtra from "@/assets/images/BEIGES AND CREAM/Irish-Beige-Extra-min.jpg";
-import irishBeige from "@/assets/images/BEIGES AND CREAM/Irish-Beige-min.jpg";
-import irishPearl from "@/assets/images/BEIGES AND CREAM/Irish-Pearl-min.jpg";
-import lightEmpredor from "@/assets/images/BEIGES AND CREAM/Light-Empredor-min.jpg";
-import limeStone from "@/assets/images/BEIGES AND CREAM/LIME-STONE-min.jpg";
-import moonPearlExtra from "@/assets/images/BEIGES AND CREAM/Moon-Pearl-Extra-min-min.jpeg";
-import opalBeige from "@/assets/images/BEIGES AND CREAM/Opal-Beige-min-min.jpeg";
-import perlantoChips from "@/assets/images/BEIGES AND CREAM/Perlanto-Chips-min.jpg";
-import perlantoRoyale from "@/assets/images/BEIGES AND CREAM/Perlanto-Royale-min.jpg";
-import perlatoSicilia from "@/assets/images/BEIGES AND CREAM/Perlato-Sicilia-min.jpg";
-import portugalBeige from "@/assets/images/BEIGES AND CREAM/PORTUGAL-BEIGE-min.jpg";
-import royalCream from "@/assets/images/BEIGES AND CREAM/Royal-Cream-min.jpg";
-import vintageCream from "@/assets/images/BEIGES AND CREAM/Vintage-Cream-min-min.jpeg";
-
-import alaskaGrey from "@/assets/images/GREYS/Alaska-Grey-min-min-400x284.jpeg";
-import arabianGrey from "@/assets/images/GREYS/Arabian-Grey-min-400x284.jpg";
-import fiorDePesco from "@/assets/images/GREYS/Fior-De-Pesco-min-400x284.jpg";
-import greyAmani from "@/assets/images/GREYS/Grey-Amani-min-400x284.jpg";
-import greyChigani from "@/assets/images/GREYS/Grey-Chigani-min-400x284.jpg";
-import greyMarfil from "@/assets/images/GREYS/Grey-Marfil-min-min-400x284.jpeg";
-import oliveGrey from "@/assets/images/GREYS/Olive-Grey-min-400x284.jpg";
-import silverSarpeggiante from "@/assets/images/GREYS/Silver-Sarpeggiante-min-min-400x284.jpg";
-
-import calacutta from "@/assets/images/WHITES/Calacutta-min-400x284.jpg";
-import goldenSpider from "@/assets/images/WHITES/Golden-Spider-min-400x284.jpg";
-import whiteImg0321 from "@/assets/images/WHITES/IMG_0321-min-400x284.jpg";
-import lhasaBianco from "@/assets/images/WHITES/Lhasa-Bianco-min-min-400x284.jpeg";
-import marmaraWhite from "@/assets/images/WHITES/Marmara-White-min-400x284.jpg";
-import statuarioExtra from "@/assets/images/WHITES/Statuario-Extra-min-400x284.jpg";
-import swissWhite from "@/assets/images/WHITES/Swiss-White-min-400x284.jpg";
-
-import americanGold from "@/assets/images/BLACKS/American-Gold-Porthro-min-1-400x284.jpg";
-import blackPorthro from "@/assets/images/BLACKS/Black-Porthro-min-400x284.jpg";
-import bresciaNortre from "@/assets/images/BLACKS/Bresica-Nortre-min-400x284.jpg";
-import oceanBlack from "@/assets/images/BLACKS/Ocean-Black-min-400x284.jpg";
-import silverPorthro from "@/assets/images/BLACKS/Silver-Porthro-min-400x284.jpg";
-
-import darkEmpredor from "@/assets/images/COLORS/Dark-Empredor-min-400x284.jpg";
-import iceBrown from "@/assets/images/COLORS/Ice-Brown-min-400x284.jpg";
-import redAlicante from "@/assets/images/COLORS/Red-Alicante-min-400x284.jpg";
-import redLanventhe from "@/assets/images/COLORS/Red-Lanventhe-min-400x284.jpg";
-import rossoPistalo from "@/assets/images/COLORS/Rosso-Pistalo-min-400x284.jpg";
-import yellowPearl from "@/assets/images/COLORS/Yellow-Pearl-min-400x284.jpg";
-
-import brownCrystalOnix from "@/assets/images/ONIX/Brown-Crystal-Onix-min-min-400x284.jpeg";
-import dragonOnix from "@/assets/images/ONIX/Dragon-Onix-min-400x284.jpg";
-import greenOnix1 from "@/assets/images/ONIX/Green-Onix1-min-400x284.jpg";
-import honeyOnix from "@/assets/images/ONIX/Honey-Onix-min-400x284.jpg";
-import mangoOnix from "@/assets/images/ONIX/Mango-Onix-min-min-400x284.jpg";
-import oniceBianco from "@/assets/images/ONIX/Onice-Bianco-min-min-400x284.jpeg";
-import onixFantastico from "@/assets/images/ONIX/Onix-Fantastico-min-400x284.jpg";
-import tigerOnix from "@/assets/images/ONIX/TIGER-ONIX-min-400x284.jpg";
-import vanillaWaveOnix from "@/assets/images/ONIX/Vanilla-Wave-Onix-min-400x284.jpg";
-import vennilaOnix from "@/assets/images/ONIX/VENNILA-ONIX-min-400x284.jpg";
-import whiteTigerOnix from "@/assets/images/ONIX/WHITE-TIGER-ONIX-min-400x284.jpg";
-
-import beigeTravertino from "@/assets/images/TRAVERTINO TILES/BEIGE-TRAVERTINO-min-2-400x284.jpg";
-import corkTravertino from "@/assets/images/TRAVERTINO TILES/CORK-TRAVERTINO-min-1-400x284.jpg";
-import lemonYellowTravertino from "@/assets/images/TRAVERTINO TILES/LEMON-YELLOW-TRAVERTINO-min-400x284.jpg";
-import redTravertino from "@/assets/images/TRAVERTINO TILES/Red-Travertino-min-400x284.jpg";
-import silverTravertineDorato from "@/assets/images/TRAVERTINO TILES/Silver-travertine-Dorato-min-400x284.jpeg";
-import titaniumTravertino from "@/assets/images/TRAVERTINO TILES/Titanium-Travertino-min-400x284.jpg";
-import travertinoClassico from "@/assets/images/TRAVERTINO TILES/TRAVERTINO-CLASSICO-min-1-400x284.jpg";
-import walnutTravertino from "@/assets/images/TRAVERTINO TILES/Walnut-Travertino-min-min-400x284.jpg";
-
-import greenOnixIndian from "@/assets/images/INDIAN MARBLE/GREEN-ONIX-min-400x284.jpg";
-import jaisalmar from "@/assets/images/INDIAN MARBLE/Jaisalmar-min-min-400x284.jpg";
-import udaipurGreen from "@/assets/images/INDIAN MARBLE/Udaipur-Green-min-min-400x284.jpg";
-
-const stonesData: StoneDetail[] = [
-  { id: "atlantic", name: "Atlantic", image: atlantic, category: "Beige & Cream", finish: "Matte", origin: "Portugal", description: "A warm sandy stone with linear patterns running across its surface." },
-  { id: "bianco-marfill", name: "Bianco Marfill", image: biancoMarfill, category: "White & Cream", finish: "Polished", origin: "Spain", description: "A light cream marble with subtle golden veining." },
-  { id: "botticino-classico", name: "Botticino Classico", image: botticinoClassico, category: "Beige & Cream", finish: "Honed", origin: "Italy", description: "Fine, uniform beige tones with delicate white veining throughout." },
-  { id: "botticino-fiorito", name: "Botticino Fiorito", image: botticinoFiorito, category: "Beige & Cream", finish: "Polished", origin: "Italy", description: "Lively pronounced fossil-rich patterns and warm cream tones." },
-  { id: "brescia-aurora", name: "Brescia Aurora", image: bresciaAurora, category: "Beige & Cream", finish: "Polished", origin: "Italy", description: "Warm beige marble with a faint pink hue and crystalline patterns." },
-  { id: "bresica-diana", name: "Brescia Diana", image: bresicaDiana, category: "Beige & Cream", finish: "Polished", origin: "Italy", description: "Classic Italian beige marble with subtle horizontal veining." },
-  { id: "cloudy-beige", name: "Cloudy Beige", image: cloudyBeige, category: "Beige & Cream", finish: "Matte", origin: "Turkey", description: "Soft, cloud-like patterns in warm beige tones." },
-  { id: "crema-miele", name: "Crema Miele", image: cremaMiele, category: "Beige & Cream", finish: "Polished", origin: "Spain", description: "Honey-toned cream marble with fine, flowing veins." },
-  { id: "crema-nova", name: "Crema Nova", image: cremaNova, category: "Beige & Cream", finish: "Polished", origin: "Portugal", description: "Classic cream marble with subtle, elegant veining." },
-  { id: "creme-rosso", name: "Crème Rosso", image: cremeRosso, category: "Beige & Cream", finish: "Polished", origin: "Turkey", description: "Warm cream tones bisected by bold brecciated red and brown veins." },
-  { id: "diane-royale", name: "Diane Royale", image: dianeRoyale, category: "Beige & Cream", finish: "Polished", origin: "France", description: "Elegant soft cream stone with refined grey-beige patterning." },
-  { id: "feather-grey", name: "Feather Grey", image: featherGrey, category: "Grey", finish: "Polished", origin: "Italy", description: "Delicate feathered grey veins float across a soft cream-white base." },
-  { id: "irish-beige", name: "Irish Beige", image: irishBeige, category: "Beige & Cream", finish: "Honed", origin: "Ireland", description: "Premium Irish limestone offering a warm beige tone with fossil character." },
-  { id: "irish-pearl", name: "Irish Pearl", image: irishPearl, category: "Beige & Cream", finish: "Polished", origin: "Ireland", description: "Luminous limestone with pearlescent cream tones and a distinctive sheen." },
-  { id: "light-empredor", name: "Light Empredor", image: lightEmpredor, category: "Beige & Cream", finish: "Polished", origin: "Turkey", description: "Warm golden-beige with soft brown veining throughout." },
-  { id: "lime-stone", name: "Lime Stone", image: limeStone, category: "Limestone", finish: "Honed", origin: "France", description: "Refined French limestone with a clean, matte surface." },
-  { id: "moon-pearl", name: "Moon Pearl Extra", image: moonPearlExtra, category: "White & Cream", finish: "Polished", origin: "Turkey", description: "Pearlescent white-cream marble with faint soft grey veining." },
-  { id: "opal-beige", name: "Opal Beige", image: opalBeige, category: "Beige & Cream", finish: "Polished", origin: "Turkey", description: "Translucent, opalescent cream stone with gentle swirling patterns." },
-  { id: "perlanto-chips", name: "Perlanto Chips", image: perlantoChips, category: "Beige & Cream", finish: "Polished", origin: "Sicily", description: "Featuring distinctive shell and fossil chip patterns in a warm cream base." },
-  { id: "perlanto-royale", name: "Perlanto Royale", image: perlantoRoyale, category: "Beige & Cream", finish: "Polished", origin: "Sicily", description: "Refined Sicilian marble with a creamy base and striking fossil details." },
-  { id: "perlato-sicilia", name: "Perlato Sicilia", image: perlatoSicilia, category: "Beige & Cream", finish: "Polished", origin: "Sicily", description: "Warm ivory marble rich with organic veins and fossil inclusions." },
-  { id: "portugal-beige", name: "Portugal Beige", image: portugalBeige, category: "Beige & Cream", finish: "Honed", origin: "Portugal", description: "Consistent, warm-toned Portuguese limestone with a gentle matte finish." },
-  { id: "royal-cream", name: "Royal Cream", image: royalCream, category: "Beige & Cream", finish: "Polished", origin: "Turkey", description: "Distinguished cream marble dressed in flowing beige and gold veins." },
-  { id: "vintage-cream", name: "Vintage Cream", image: vintageCream, category: "Beige & Cream", finish: "Honed", origin: "Turkey", description: "Characterful aged-cream stone with a soft, vintage patina." },
-  { id: "alaska-grey", name: "Alaska Grey", image: alaskaGrey, category: "Greys", finish: "Polished", origin: "Turkey", description: "A striking grey marble with intense, dramatic white veining patterns resembling icy landscapes." },
-  { id: "arabian-grey", name: "Arabian Grey", image: arabianGrey, category: "Greys", finish: "Polished", origin: "Oman", description: "Rich, deep grey tones interwoven with subtle lighter veins for a sophisticated, modern aesthetic." },
-  { id: "fior-de-pesco", name: "Fior De Pesco", image: fiorDePesco, category: "Greys", finish: "Polished", origin: "Italy", description: "A complex Italian marble featuring a grey base layered with hints of peach, white, and subtle green." },
-  { id: "grey-amani", name: "Grey Amani", image: greyAmani, category: "Greys", finish: "Polished", origin: "Italy", description: "Elegant bronze-grey marble characterized by fine, golden-white veining and a warm, luxurious depth." },
-  { id: "grey-chigani", name: "Grey Chigani", image: greyChigani, category: "Greys", finish: "Polished", origin: "Turkey", description: "A consistent, mid-tone grey marble with tight, delicate veining perfect for large modern surfaces." },
-  { id: "grey-marfil", name: "Grey Marfil", image: greyMarfil, category: "Greys", finish: "Polished", origin: "Spain", description: "A cool grey interpretation of classic Marfil, offering subtle, uniform patterning and a sleek finish." },
-  { id: "olive-grey", name: "Olive Grey", image: oliveGrey, category: "Greys", finish: "Honed", origin: "Turkey", description: "Deep grey limestone with subtle olive-green undertones and occasional marine fossils." },
-  { id: "silver-sarpeggiante", name: "Silver Sarpeggiante", image: silverSarpeggiante, category: "Greys", finish: "Polished", origin: "Italy", description: "A highly linear grey marble featuring horizontal, wood-like bands in alternating silver and charcoal." },
-  { id: "calacutta", name: "Calacutta", image: calacutta, category: "White & Cream", finish: "Polished", origin: "Italy", description: "The definitive luxury marble. Crisp white background with bold, dramatic grey and gold veining." },
-  { id: "golden-spider", name: "Golden Spider", image: goldenSpider, category: "White & Cream", finish: "Polished", origin: "Greece", description: "A unique white marble featuring a striking web of fine golden-yellow and orange veins." },
-  { id: "white-img0321", name: "Classic White", image: whiteImg0321, category: "White & Cream", finish: "Polished", origin: "Unknown", description: "A pristine white marble with subtle, misty grey movements." },
-  { id: "lhasa-bianco", name: "Lhasa Bianco", image: lhasaBianco, category: "White & Cream", finish: "Polished", origin: "Brazil", description: "A dynamic white quartzite with sweeping linear patterns in sharp grey tones." },
-  { id: "marmara-white", name: "Marmara White", image: marmaraWhite, category: "White & Cream", finish: "Polished", origin: "Turkey", description: "Distinctive linear marble featuring perfectly straight, parallel grey veins on a stark white base." },
-  { id: "statuario-extra", name: "Statuario Extra", image: statuarioExtra, category: "White & Cream", finish: "Polished", origin: "Italy", description: "The sculptor's choice. Purest white with thick, bold grey veining, offering unmatched elegance." },
-  { id: "swiss-white", name: "Swiss White", image: swissWhite, category: "White & Cream", finish: "Honed", origin: "Switzerland", description: "A cool, brilliant white stone with a delicate crystalline structure and a soft matte finish." },
-  { id: "american-gold", name: "American Gold Porthro", image: americanGold, category: "Blacks", finish: "Polished", origin: "Unknown", description: "A dramatic black marble intensely fractured by striking golden and copper veining." },
-  { id: "black-porthro", name: "Black Porthro", image: blackPorthro, category: "Blacks", finish: "Polished", origin: "Unknown", description: "Deepest black marble with sharp, electric white veins cutting abstract geometry across the absolute dark." },
-  { id: "brescia-nortre", name: "Brescia Nortre", image: bresciaNortre, category: "Blacks", finish: "Polished", origin: "Unknown", description: "A sophisticated dark charcoal surface swirled with organic, silver-white movement." },
-  { id: "ocean-black", name: "Ocean Black", image: oceanBlack, category: "Blacks", finish: "Honed", origin: "Unknown", description: "A textured, oceanic deep grey-black stone with subtle rippled patterns that catch the light." },
-  { id: "silver-porthro", name: "Silver Porthro", image: silverPorthro, category: "Blacks", finish: "Polished", origin: "Unknown", description: "Intense black background illuminated by intricate, spiderweb-like silver veining." },
-
-  { id: "dark-empredor", name: "Dark Empredor", image: darkEmpredor, category: "Colors", finish: "Polished", origin: "Spain", description: "A classic dark brown marble fractured by stunning spider webs of bright crystalline veins." },
-  { id: "ice-brown", name: "Ice Brown", image: iceBrown, category: "Colors", finish: "Polished", origin: "Brazil", description: "An exotic stone featuring sharp, shattered patterns of cool grey and warm brown." },
-  { id: "red-alicante", name: "Red Alicante", image: redAlicante, category: "Colors", finish: "Polished", origin: "Spain", description: "A rich, vibrant earthy red marble laced with sudden white calcite veins." },
-  { id: "red-lanventhe", name: "Red Lanventhe", image: redLanventhe, category: "Colors", finish: "Polished", origin: "Unknown", description: "A deeply saturated crimson and burgundy marble offering an ornate, dramatic presence." },
-  { id: "rosso-pistalo", name: "Rosso Pistalo", image: rossoPistalo, category: "Colors", finish: "Polished", origin: "Unknown", description: "A complex, brecciated red stone peppered with multicoloured pebble-like inclusions." },
-  { id: "yellow-pearl", name: "Yellow Pearl", image: yellowPearl, category: "Colors", finish: "Polished", origin: "Unknown", description: "A luminous, golden-yellow stone with pearlescent qualities and a warm, sunny disposition." },
-
-  { id: "brown-crystal-onix", name: "Brown Crystal Onix", image: brownCrystalOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "A highly translucent onyx featuring layered bands of rich caramel, amber, and deep brown." },
-  { id: "dragon-onix", name: "Dragon Onix", image: dragonOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "Fierce, dynamic patterns in green, gold, and amber that resemble the scales and fire of myth." },
-  { id: "green-onix1", name: "Green Onix", image: greenOnix1, category: "Onyx", finish: "Polished", origin: "Pakistan", description: "A breathtaking emerald and jade-toned translucent stone, perfect for backlighting." },
-  { id: "honey-onix", name: "Honey Onix", image: honeyOnix, category: "Onyx", finish: "Polished", origin: "Iran", description: "Warm, glowing amber and golden tones characterized by cloudy, translucent depths." },
-  { id: "mango-onix", name: "Mango Onix", image: mangoOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "Vibrant yellow-orange onyx displaying soft, fruity tones and flowing water-like layers." },
-  { id: "onice-bianco", name: "Onice Bianco", image: oniceBianco, category: "Onyx", finish: "Polished", origin: "Unknown", description: "A rare white onyx offering milky translucence and incredibly delicate, pale veining." },
-  { id: "onix-fantastico", name: "Onix Fantastico", image: onixFantastico, category: "Onyx", finish: "Polished", origin: "Mexico", description: "An explosion of layered colors ranging from deep red to pale yellow in stunning concentric bands." },
-  { id: "tiger-onix", name: "Tiger Onix", image: tigerOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "Striking parallel bands of contrasting gold, brown, and cream resembling a tiger's coat." },
-  { id: "vanilla-wave-onix", name: "Vanilla Wave Onix", image: vanillaWaveOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "Soft, undulating waves of cream and pale yellow creating a serene, luminous surface." },
-  { id: "vennila-onix", name: "Vennila Onix", image: vennilaOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "A pale, creamy onyx perfect for creating soft, glowing, backlit installations." },
-  { id: "white-tiger-onix", name: "White Tiger Onix", image: whiteTigerOnix, category: "Onyx", finish: "Polished", origin: "Unknown", description: "High-contrast horizontal striping in stark whites, greys, and creams." },
-
-  { id: "beige-travertino", name: "Beige Travertino", image: beigeTravertino, category: "Travertine", finish: "Honed", origin: "Turkey", description: "Classic warm beige travertine with gentle linear movement and natural porosity." },
-  { id: "cork-travertino", name: "Cork Travertino", image: corkTravertino, category: "Travertine", finish: "Honed", origin: "Unknown", description: "A textured, highly porous travertine resembling natural cork in both color and feel." },
-  { id: "lemon-yellow-travertino", name: "Lemon Yellow Travertino", image: lemonYellowTravertino, category: "Travertine", finish: "Honed", origin: "Unknown", description: "A uniquely vibrant, sunny yellow travertine bringing warmth to rustic and modern spaces alike." },
-  { id: "red-travertino", name: "Red Travertino", image: redTravertino, category: "Travertine", finish: "Honed", origin: "Iran", description: "A bold, saturated red travertine featuring strongly defined parallel striations in varying tones." },
-  { id: "silver-travertine-dorato", name: "Silver Travertine Dorato", image: silverTravertineDorato, category: "Travertine", finish: "Honed", origin: "Italy", description: "Sophisticated grey and silver tones layered with warm golden-brown accents." },
-  { id: "titanium-travertino", name: "Titanium Travertino", image: titaniumTravertino, category: "Travertine", finish: "Honed", origin: "Unknown", description: "A dramatic, dark-toned travertine with deep silver, charcoal, and cool grey banding." },
-  { id: "travertino-classico", name: "Travertino Classico", image: travertinoClassico, category: "Travertine", finish: "Honed", origin: "Italy", description: "The definitive Roman stone. Warm beige with signature porous texture and parallel veining." },
-  { id: "walnut-travertino", name: "Walnut Travertino", image: walnutTravertino, category: "Travertine", finish: "Honed", origin: "Turkey", description: "A rich, medium-brown travertine with layers of cream and dark chocolate tones." },
-
-  { id: "green-onix-indian", name: "Indian Green Onix", image: greenOnixIndian, category: "Indian Marble", finish: "Polished", origin: "India", description: "A vibrant, translucent green onyx from India characterized by rolling clouds of emerald and jade." },
-  { id: "jaisalmar", name: "Jaisalmer Yellow", image: jaisalmar, category: "Indian Marble", finish: "Polished", origin: "India", description: "A famous historic Indian stone boasting a deep, rich golden-yellow tone with subtle textural variations." },
-  { id: "udaipur-green", name: "Udaipur Green", image: udaipurGreen, category: "Indian Marble", finish: "Polished", origin: "India", description: "Also known as Verde Guatemala, this classic deep forest-green marble features bold striking white and light green veins." },
-];
+import { StoneDetail, stonesData } from "@/data/stones";
+import MarbleSidebar from "./MarbleSidebar";
 
 function radiusFor(size: number) {
-  if (size <= 80) return 14;
-  if (size <= 110) return 18;
-  if (size <= 140) return 20;
+  if (size <= 130) return 14;
+  if (size <= 180) return 18;
+  if (size <= 230) return 20;
   return 22;
 }
 
-export const PATTERN_WIDTH = 1400;
-export const PATTERN_HEIGHT = 1280;
+export const PATTERN_WIDTH = 5800; // Increased for much wider horizontal scattering
+export const PATTERN_HEIGHT = 2200; // Increased for more vertical scattering space
 
-// 70 unique, evenly-spaced positions — no tiling, no crowding
+// Spread out pattern - 14 columns, 5 rows (70 total)
 const blocks = [
-  // Row 1  (y ~10-80)
-  { x: 10, y: 25, size: 85 },
-  { x: 130, y: 8, size: 150 },
-  { x: 310, y: 20, size: 95 },
-  { x: 435, y: 5, size: 125 },
-  { x: 590, y: 18, size: 80 },
-  { x: 700, y: 10, size: 140 },
-  { x: 872, y: 22, size: 65 },
-  { x: 962, y: 8, size: 130 },
-  { x: 1122, y: 15, size: 90 },
-  { x: 1240, y: 5, size: 145 },
-  // Row 2  (y ~185-260)
-  { x: 8, y: 195, size: 135 },
-  { x: 178, y: 182, size: 75 },
-  { x: 285, y: 197, size: 120 },
-  { x: 435, y: 190, size: 60 },
-  { x: 525, y: 180, size: 145 },
-  { x: 700, y: 198, size: 85 },
-  { x: 815, y: 185, size: 110 },
-  { x: 955, y: 195, size: 140 },
-  { x: 1125, y: 183, size: 70 },
-  { x: 1228, y: 190, size: 130 },
-  // Row 3  (y ~375-445)
-  { x: 12, y: 378, size: 110 },
-  { x: 152, y: 370, size: 90 },
-  { x: 272, y: 382, size: 145 },
-  { x: 448, y: 370, size: 65 },
-  { x: 543, y: 378, size: 130 },
-  { x: 703, y: 368, size: 100 },
-  { x: 833, y: 380, size: 145 },
-  { x: 1008, y: 370, size: 80 },
-  { x: 1118, y: 380, size: 135 },
-  { x: 1283, y: 370, size: 95 },
-  // Row 4  (y ~555-630)
-  { x: 10, y: 563, size: 80 },
-  { x: 125, y: 555, size: 140 },
-  { x: 297, y: 568, size: 110 },
-  { x: 438, y: 557, size: 125 },
-  { x: 594, y: 565, size: 70 },
-  { x: 698, y: 555, size: 155 },
-  { x: 882, y: 568, size: 80 },
-  { x: 993, y: 557, size: 120 },
-  { x: 1143, y: 563, size: 140 },
-  { x: 1315, y: 555, size: 75 },
-  // Row 5  (y ~745-815)
-  { x: 15, y: 748, size: 120 },
-  { x: 168, y: 740, size: 85 },
-  { x: 288, y: 750, size: 145 },
-  { x: 466, y: 742, size: 70 },
-  { x: 570, y: 750, size: 115 },
-  { x: 718, y: 740, size: 80 },
-  { x: 832, y: 750, size: 140 },
-  { x: 1006, y: 742, size: 65 },
-  { x: 1105, y: 750, size: 130 },
-  { x: 1270, y: 740, size: 110 },
-  // Row 6  (y ~930-1000)
-  { x: 12, y: 932, size: 100 },
-  { x: 145, y: 925, size: 145 },
-  { x: 323, y: 935, size: 80 },
-  { x: 436, y: 925, size: 130 },
-  { x: 598, y: 932, size: 65 },
-  { x: 697, y: 925, size: 125 },
-  { x: 855, y: 935, size: 90 },
-  { x: 978, y: 925, size: 140 },
-  { x: 1150, y: 932, size: 80 },
-  { x: 1265, y: 925, size: 120 },
-  // Row 7  (y ~1110-1170)
-  { x: 15, y: 1115, size: 85 },
-  { x: 135, y: 1108, size: 130 },
-  { x: 300, y: 1118, size: 105 },
-  { x: 438, y: 1110, size: 90 },
-  { x: 562, y: 1118, size: 145 },
-  { x: 742, y: 1108, size: 70 },
-  { x: 848, y: 1118, size: 130 },
-  { x: 1010, y: 1110, size: 100 },
-  { x: 1145, y: 1118, size: 140 },
-  { x: 1320, y: 1108, size: 80 },
+  // Row 1
+  { x: 56, y: 83, size: 217 },
+  { x: 620, y: 72, size: 201 },
+  { x: 1021, y: 123, size: 225 },
+  { x: 1337, y: 46, size: 174 },
+  { x: 1833, y: 160, size: 213 },
+  { x: 2235, y: 156, size: 215 },
+  { x: 2610, y: 40, size: 215 },
+  { x: 3041, y: 161, size: 162 },
+  { x: 3501, y: 63, size: 228 },
+  { x: 3833, y: 97, size: 155 },
+  { x: 4283, y: 152, size: 208 },
+  { x: 4746, y: 23, size: 201 },
+  { x: 5038, y: 112, size: 166 },
+  { x: 5586, y: 34, size: 171 },
+  // Row 2
+  { x: 35, y: 569, size: 193 },
+  { x: 528, y: 482, size: 217 },
+  { x: 945, y: 594, size: 238 },
+  { x: 1402, y: 637, size: 188 },
+  { x: 1833, y: 513, size: 151 },
+  { x: 2257, y: 519, size: 203 },
+  { x: 2558, y: 607, size: 237 },
+  { x: 2995, y: 497, size: 189 },
+  { x: 3429, y: 594, size: 237 },
+  { x: 3851, y: 501, size: 180 },
+  { x: 4315, y: 530, size: 221 },
+  { x: 4727, y: 598, size: 200 },
+  { x: 5082, y: 491, size: 167 },
+  { x: 5474, y: 604, size: 202 },
+  // Row 3
+  { x: 101, y: 1021, size: 194 },
+  { x: 454, y: 1046, size: 172 },
+  { x: 946, y: 1043, size: 150 },
+  { x: 1293, y: 998, size: 183 },
+  { x: 1679, y: 990, size: 221 },
+  { x: 2168, y: 1090, size: 218 },
+  { x: 2578, y: 953, size: 231 },
+  { x: 2939, y: 1090, size: 228 },
+  { x: 3369, y: 962, size: 187 },
+  { x: 3750, y: 1061, size: 176 },
+  { x: 4328, y: 999, size: 179 },
+  { x: 4750, y: 1012, size: 200 },
+  { x: 5140, y: 983, size: 208 },
+  { x: 5412, y: 986, size: 193 },
+  // Row 4
+  { x: 185, y: 1441, size: 199 },
+  { x: 475, y: 1487, size: 148 },
+  { x: 1006, y: 1425, size: 195 },
+  { x: 1281, y: 1383, size: 175 },
+  { x: 1746, y: 1379, size: 221 },
+  { x: 2134, y: 1402, size: 219 },
+  { x: 2615, y: 1445, size: 168 },
+  { x: 3102, y: 1456, size: 193 },
+  { x: 3409, y: 1373, size: 235 },
+  { x: 3929, y: 1487, size: 217 },
+  { x: 4267, y: 1413, size: 192 },
+  { x: 4673, y: 1493, size: 214 },
+  { x: 5167, y: 1455, size: 226 },
+  { x: 5419, y: 1513, size: 145 },
+  // Row 5
+  { x: 176, y: 1965, size: 165 },
+  { x: 465, y: 1955, size: 208 },
+  { x: 1027, y: 1935, size: 196 },
+  { x: 1365, y: 1909, size: 191 },
+  { x: 1784, y: 1892, size: 195 },
+  { x: 2131, y: 1932, size: 205 },
+  { x: 2619, y: 1977, size: 165 },
+  { x: 3082, y: 1960, size: 150 },
+  { x: 3507, y: 1911, size: 160 },
+  { x: 3915, y: 1897, size: 228 },
+  { x: 4186, y: 1783, size: 163 },
+  { x: 4703, y: 1838, size: 239 },
+  { x: 5166, y: 1959, size: 146 },
+  { x: 5412, y: 1785, size: 219 },
 ];
 
 const MIN_ZOOM = 1.0;  // default view is min — can't zoom out below default
-const MAX_ZOOM = 1.4;  // one click from default
-const ZOOM_STEP = 0.4; // single step covers full range
+const MAX_ZOOM = 1.6;  // one click from default
+const ZOOM_STEP = 0.6; // single step covers full range
 
 const SwatchHero = () => {
+  // ── Dimensions and Tiling
+  const numRows = Math.ceil(stonesData.length / blocks.length);
+  const totalHeight = PATTERN_HEIGHT * numRows;
+
   const [selectedStone, setSelectedStone] = useState<StoneDetail | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // ── Zoom (starts at 0.85 for cinematic zoom-in, then animates to MIN_ZOOM=1.0)
-  const [zoomLevel, setZoomLevel] = useState(0.85);
-  const zoomRef = useRef(zoomLevel);
+  // ── Zoom (Starts at maximum zoom as requested)
+  const [zoomLevel, setZoomLevel] = useState(1.6);
+  const zoomRef = useRef(1.6);
   zoomRef.current = zoomLevel;
 
   // ── Pan state (synced from drag)
@@ -284,10 +127,9 @@ const SwatchHero = () => {
   const [hoveredStone, setHoveredStone] = useState<StoneDetail | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Auto zoom-in on mount: 0.85 → 1.0 over 1.4s
+  // Load at MAX_ZOOM immediately
   useEffect(() => {
-    const timer = setTimeout(() => setZoomLevel(MIN_ZOOM), 80);
-    return () => clearTimeout(timer);
+    setZoomLevel(1.6);
   }, []);
 
   // Zoom handlers
@@ -295,22 +137,11 @@ const SwatchHero = () => {
   const zoomOut = () => {
     const next = Math.max(+(zoomLevel - ZOOM_STEP).toFixed(2), MIN_ZOOM);
     setZoomLevel(next);
-    // Reset pan when back at default
-    if (next <= MIN_ZOOM) {
-      panRef.current = { x: 0, y: 0 };
-      setPanX(0);
-      setPanY(0);
-      if (canvasRef.current) {
-        canvasRef.current.style.transition = "transform 0.6s cubic-bezier(0.16,1,0.3,1)";
-        canvasRef.current.style.transform = `translate(0px, 0px) scale(${MIN_ZOOM})`;
-      }
-    }
   };
 
   // ── Drag-to-pan handlers (direct DOM mutation — no re-renders during drag)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Only pan when zoomed in, and ignore clicks on buttons/links
-    if (zoomRef.current <= MIN_ZOOM) return;
+    // Zoom requirement removed so users can pan immediately across the large canvas
     if ((e.target as HTMLElement).closest('button,a')) return;
     isDraggingRef.current = true;
     dragStartRef.current = { mx: e.clientX, my: e.clientY, panX: panRef.current.x, panY: panRef.current.y };
@@ -326,14 +157,47 @@ const SwatchHero = () => {
     if (!isDraggingRef.current) return;
     const dx = e.clientX - dragStartRef.current.mx;
     const dy = e.clientY - dragStartRef.current.my;
-    const newX = dragStartRef.current.panX + dx;
-    const newY = dragStartRef.current.panY + dy;
+
+    // Calculate raw new position
+    let newX = dragStartRef.current.panX + dx;
+    let newY = dragStartRef.current.panY + dy;
+
+    // Get actual dimensions
+    const winW = sectionRef.current?.clientWidth || window.innerWidth;
+    const winH = sectionRef.current?.clientHeight || window.innerHeight;
+
+    // Canvas dimensions (5800px width, totalHeight accounts for multiple rows)
+    const baseW = window.innerWidth >= 768 ? 5800 : 3800;
+    const baseH = totalHeight;
+    const s = zoomRef.current;
+
+    // Strict stone boundaries from 106 stones across multiple rows
+    const minX = 35 * (baseW / 5800) * s;
+    const maxX = 5757 * (baseW / 5800) * s;
+    const minY = 23 * s;
+    const maxY = (totalHeight - 70) * s;
+
+    const halfW = (baseW * s) / 2;
+    const halfH = (baseH * s) / 2;
+
+    // x-pan: ensures viewport never drifts beyond the outermost stones
+    const xMax = halfW - minX - (winW / 2);
+    const xMin = (winW / 2) + halfW - maxX;
+
+    // y-pan: accounts for total multi-row height
+    const yMax = halfH - minY - (winH / 2);
+    const yMin = (winH / 2) + halfH - maxY;
+
+    // Final strict clamp
+    newX = Math.max(xMin, Math.min(xMax, newX));
+    newY = Math.max(yMin, Math.min(yMax, newY));
+
     panRef.current = { x: newX, y: newY };
     if (canvasRef.current) {
       canvasRef.current.style.transform =
         `translate(${newX}px, ${newY}px) scale(${zoomRef.current})`;
     }
-  }, []);
+  }, [totalHeight]);
 
   const handleMouseUp = useCallback(() => {
     if (!isDraggingRef.current) return;
@@ -358,8 +222,6 @@ const SwatchHero = () => {
   // Categories for filter
   const categories = ["All", ...Array.from(new Set(stonesData.map(s => s.category)))];
   const toPct = (val: number, max: number) => `${(val / max) * 100}%`;
-  const numRows = Math.ceil(stonesData.length / blocks.length);
-  const totalHeight = PATTERN_HEIGHT * numRows;
 
   return (
     <section
@@ -367,7 +229,7 @@ const SwatchHero = () => {
       className="relative w-full h-screen min-h-[600px] overflow-hidden select-none pt-24 pb-16"
       style={{
         background: "#efefec",
-        cursor: zoomLevel > MIN_ZOOM ? "grab" : "default",
+        cursor: "grab", // Always grabbable so panning the large canvas is obvious
       }}
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
@@ -417,39 +279,49 @@ const SwatchHero = () => {
             willChange: "transform",
           }}
         >
-          {/* Container maintaining the dynamically tiled aspect ratio */}
+          {/* Container maintaining the dynamically tiled aspect ratio - Now hugely expanded */}
           <div
-            className="relative w-[95%] max-w-7xl mx-auto"
+            className="relative w-[3800px] md:w-[5800px] mx-auto"
             style={{ aspectRatio: `${PATTERN_WIDTH} / ${totalHeight}` }}
           >
             {stonesData.map((stone, i) => {
               const b = blocks[i % blocks.length];
               const rowOffset = Math.floor(i / blocks.length) * PATTERN_HEIGHT;
               const isFilteredOut = activeCategory !== "All" && stone.category !== activeCategory;
+              const isSelected = selectedStone?.id === stone.id;
+
+              const stoneVariants = {
+                hidden: { scale: 0.3, opacity: 0 },
+                visible: {
+                  scale: isSelected ? 1.05 : 1,
+                  opacity: isFilteredOut ? 0.15 : 1,
+                  y: isSelected ? -5 : 0,
+                  filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)",
+                  zIndex: isSelected ? 20 : 1
+                },
+                hover: {
+                  scale: 1.02,
+                  y: -5,
+                  boxShadow: "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30)",
+                  zIndex: 10
+                }
+              };
 
               return (
                 <motion.div
                   key={i}
                   className="absolute overflow-hidden cursor-pointer"
-                  whileHover={{
-                    scale: 1.02,
-                    y: -5,
-                    boxShadow: "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30)",
-                    zIndex: 10,
-                    transition: { duration: 0.28, ease: [0.16, 1, 0.3, 1] }
-                  }}
+                  variants={stoneVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: false, amount: 0.1 }}
+                  whileHover="hover"
                   onClick={() => setSelectedStone(stone)}
                   onMouseEnter={() => setHoveredStone(stone)}
                   onMouseLeave={() => setHoveredStone(null)}
-                  animate={{
-                    opacity: isFilteredOut ? 0.15 : 1,
-                    scale: 1,
-                    y: 0,
-                    filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)"
-                  }}
                   transition={{
-                    duration: 0.5,
-                    delay: i * 0.02,
+                    duration: 0.6,
+                    delay: i * 0.005,
                     ease: [0.16, 1, 0.3, 1]
                   }}
                   style={{
@@ -458,10 +330,12 @@ const SwatchHero = () => {
                     width: toPct(b.size, PATTERN_WIDTH),
                     height: toPct(b.size, totalHeight),
                     borderRadius: `${radiusFor(b.size)}px`,
-                    // Directional shadow: dark, bottom-right only — no glow
-                    boxShadow: "6px 6px 14px rgba(0,0,0,0.50), 12px 12px 24px rgba(0,0,0,0.35)",
-                    // Glass border: subtle light edge
-                    border: "1px solid rgba(255,255,255,0.18)",
+                    // Brighter high-opacity white border
+                    border: isSelected ? "none" : "2px solid rgba(255, 255, 255, 0.82)",
+                    // Enhanced elevation glow + directional shadow + inner glow
+                    boxShadow: isSelected
+                      ? "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30), 0 0 0 3px #c8a47a"
+                      : "6px 6px 14px rgba(0,0,0,0.40), 0 0 20px rgba(255,255,255,0.22), inset 0 0 15px rgba(255,255,255,0.12)",
                     pointerEvents: isFilteredOut ? "none" : "auto",
                     willChange: "transform",
                   }}
@@ -474,13 +348,13 @@ const SwatchHero = () => {
                     whileHover={{ scale: 1.08 }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                   />
-                  {/* Glass sheen overlay — sits on top of image, not blocking it */}
+                  {/* Enhanced glass sheen overlay */}
                   <div
                     style={{
                       position: "absolute",
                       inset: 0,
                       background:
-                        "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.00) 60%)",
+                        "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.00) 50%, rgba(255,255,255,0.05) 100%)",
                       pointerEvents: "none",
                       borderRadius: "inherit",
                     }}
