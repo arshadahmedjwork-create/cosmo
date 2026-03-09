@@ -1,15 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ChevronRight } from "lucide-react";
+import { X, ChevronRight, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export interface StoneDetail {
-    id: string;
-    name: string;
-    image: string;
-    category: string;
-    finish: string;
-    origin: string;
-    description: string;
-}
+import { StoneDetail } from "@/data/stones";
 
 interface MarbleSidebarProps {
     stone: StoneDetail | null;
@@ -17,6 +10,7 @@ interface MarbleSidebarProps {
 }
 
 const MarbleSidebar = ({ stone, onClose }: MarbleSidebarProps) => {
+    const navigate = useNavigate();
     return (
         <AnimatePresence>
             {stone && (
@@ -98,10 +92,23 @@ const MarbleSidebar = ({ stone, onClose }: MarbleSidebarProps) => {
                                 </div>
                             </div>
 
+                            {/* Explore Collection – primary CTA */}
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    navigate(`/collection/${stone.id}`);
+                                }}
+                                className="mt-auto flex items-center justify-between px-6 py-4 bg-[#3b2a1a] text-white hover:bg-[#2e2014] transition-colors text-sm font-medium tracking-wide"
+                            >
+                                Explore Collection
+                                <ArrowRight size={16} />
+                            </button>
+
+                            {/* Request a Sample – secondary */}
                             <a
                                 href="#contact"
                                 onClick={onClose}
-                                className="mt-auto flex items-center justify-between px-6 py-4 bg-stone-900 text-white hover:bg-stone-800 transition-colors text-sm font-medium tracking-wide"
+                                className="flex items-center justify-between px-6 py-3 bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors text-sm tracking-wide"
                             >
                                 Request a Sample
                                 <ChevronRight size={16} />

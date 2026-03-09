@@ -4,7 +4,12 @@ import { Menu, X } from "lucide-react";
 import cosmoLogo from "@/assets/cosmo-logo.png";
 import TextureSphere from "./TextureSphere";
 
-const Navbar = () => {
+interface NavbarProps {
+  view: "experience" | "grid";
+  onViewChange: (view: "experience" | "grid") => void;
+}
+
+const Navbar = ({ view, onViewChange }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -39,16 +44,26 @@ const Navbar = () => {
           <img src={cosmoLogo} alt="Cosmo Stone" className="h-8 md:h-10 w-auto" />
         </Link>
 
-        {/* Center Toggle - Experience View */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <button className="flex items-center gap-3 px-4 py-2 border border-stone-200 bg-white/50 backdrop-blur-sm rounded-none hover:bg-white/80 transition-colors">
-            <div className="grid grid-cols-2 gap-[2px] w-4 h-4 opacity-70">
+        {/* Center Toggle - View Switcher */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm">
+          <button
+            onClick={() => onViewChange("experience")}
+            className={`p-2.5 transition-colors ${view === "experience" ? "bg-[#252525] text-white" : "text-stone-400 hover:text-stone-600"}`}
+            aria-label="Experience View"
+          >
+            <div className="grid grid-cols-2 gap-[2px] w-4 h-4">
               <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
               <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
               <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
               <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
             </div>
-            <span className="text-sm font-medium tracking-wide">experience view</span>
+          </button>
+          <div className="w-[1px] h-4 bg-stone-200" />
+          <button
+            onClick={() => onViewChange("grid")}
+            className={`px-4 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${view === "grid" ? "bg-[#252525] text-white" : "text-stone-600 hover:bg-stone-50"}`}
+          >
+            grid view
           </button>
         </div>
 
