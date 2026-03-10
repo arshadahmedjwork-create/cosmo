@@ -1,106 +1,120 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Settings2, X } from "lucide-react";
 import { StoneDetail, stonesData } from "@/data/stones";
 import MarbleSidebar from "./MarbleSidebar";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 function radiusFor(size: number) {
-  if (size <= 130) return 14;
-  if (size <= 180) return 18;
-  if (size <= 230) return 20;
+  if (size <= 200) return 16;
+  if (size <= 280) return 18;
+  if (size <= 340) return 20;
   return 22;
 }
 
-export const PATTERN_WIDTH = 5800; // Increased for much wider horizontal scattering
-export const PATTERN_HEIGHT = 2200; // Increased for more vertical scattering space
+export const PATTERN_WIDTH = 5800;
+export const PATTERN_HEIGHT = 5400; // Taller canvas to fit alternating big/small granite tiles
 
-// Spread out pattern - 14 columns, 5 rows (70 total)
-const blocks = [
-  // Row 1
-  { x: 56, y: 83, size: 217 },
-  { x: 620, y: 72, size: 201 },
-  { x: 1021, y: 123, size: 225 },
-  { x: 1337, y: 46, size: 174 },
-  { x: 1833, y: 160, size: 213 },
-  { x: 2235, y: 156, size: 215 },
-  { x: 2610, y: 40, size: 215 },
-  { x: 3041, y: 161, size: 162 },
-  { x: 3501, y: 63, size: 228 },
-  { x: 3833, y: 97, size: 155 },
-  { x: 4283, y: 152, size: 208 },
-  { x: 4746, y: 23, size: 201 },
-  { x: 5038, y: 112, size: 166 },
-  { x: 5586, y: 34, size: 171 },
-  // Row 2
-  { x: 35, y: 569, size: 193 },
-  { x: 528, y: 482, size: 217 },
-  { x: 945, y: 594, size: 238 },
-  { x: 1402, y: 637, size: 188 },
-  { x: 1833, y: 513, size: 151 },
-  { x: 2257, y: 519, size: 203 },
-  { x: 2558, y: 607, size: 237 },
-  { x: 2995, y: 497, size: 189 },
-  { x: 3429, y: 594, size: 237 },
-  { x: 3851, y: 501, size: 180 },
-  { x: 4315, y: 530, size: 221 },
-  { x: 4727, y: 598, size: 200 },
-  { x: 5082, y: 491, size: 167 },
-  { x: 5474, y: 604, size: 202 },
-  // Row 3
-  { x: 101, y: 1021, size: 194 },
-  { x: 454, y: 1046, size: 172 },
-  { x: 946, y: 1043, size: 150 },
-  { x: 1293, y: 998, size: 183 },
-  { x: 1679, y: 990, size: 221 },
-  { x: 2168, y: 1090, size: 218 },
-  { x: 2578, y: 953, size: 231 },
-  { x: 2939, y: 1090, size: 228 },
-  { x: 3369, y: 962, size: 187 },
-  { x: 3750, y: 1061, size: 176 },
-  { x: 4328, y: 999, size: 179 },
-  { x: 4750, y: 1012, size: 200 },
-  { x: 5140, y: 983, size: 208 },
-  { x: 5412, y: 986, size: 193 },
-  // Row 4
-  { x: 185, y: 1441, size: 199 },
-  { x: 475, y: 1487, size: 148 },
-  { x: 1006, y: 1425, size: 195 },
-  { x: 1281, y: 1383, size: 175 },
-  { x: 1746, y: 1379, size: 221 },
-  { x: 2134, y: 1402, size: 219 },
-  { x: 2615, y: 1445, size: 168 },
-  { x: 3102, y: 1456, size: 193 },
-  { x: 3409, y: 1373, size: 235 },
-  { x: 3929, y: 1487, size: 217 },
-  { x: 4267, y: 1413, size: 192 },
-  { x: 4673, y: 1493, size: 214 },
-  { x: 5167, y: 1455, size: 226 },
-  { x: 5419, y: 1513, size: 145 },
-  // Row 5
-  { x: 176, y: 1965, size: 165 },
-  { x: 465, y: 1955, size: 208 },
-  { x: 1027, y: 1935, size: 196 },
-  { x: 1365, y: 1909, size: 191 },
-  { x: 1784, y: 1892, size: 195 },
-  { x: 2131, y: 1932, size: 205 },
-  { x: 2619, y: 1977, size: 165 },
-  { x: 3082, y: 1960, size: 150 },
-  { x: 3507, y: 1911, size: 160 },
-  { x: 3915, y: 1897, size: 228 },
-  { x: 4186, y: 1783, size: 163 },
-  { x: 4703, y: 1838, size: 239 },
-  { x: 5166, y: 1959, size: 146 },
-  { x: 5412, y: 1785, size: 219 },
-];
+// ── Virtual Grid Layout Generation ──
+// Divide the canvas into a grid with enough cells for all stones.
+const MIN_DISTANCE = 350; // Increased spacing
+
+function generateScatteredLayout(numStones: number) {
+  const generatedBlocks: { x: number; y: number; size: number; }[] = [];
+
+  // Collage-style: 3 size tiers randomly assigned for an organic mix
+  // ~30% big, ~40% medium, ~30% small
+  const SIZE_TIERS = [
+    { min: 420, max: 500 },  // BIG
+    { min: 300, max: 360 },  // MEDIUM
+    { min: 280, max: 340 },  // SMALL
+  ];
+
+  // Pre-assign random tiers using seeded shuffle for consistent collage feel
+  const tierAssignments: number[] = [];
+  for (let i = 0; i < numStones; i++) {
+    const roll = Math.random();
+    if (roll < 0.30) tierAssignments.push(0);       // big
+    else if (roll < 0.70) tierAssignments.push(1);   // medium
+    else tierAssignments.push(2);                     // small
+  }
+
+  // Compute grid dimensions to closely match numStones
+  const cols = 10;
+  const rows = Math.ceil(numStones / cols);
+  const zoneWidth = PATTERN_WIDTH / cols;
+  const zoneHeight = PATTERN_HEIGHT / rows;
+
+  // Simple collision detection
+  const isOverlapping = (x: number, y: number, size: number) => {
+    return generatedBlocks.some(block => {
+      const dx = block.x + block.size / 2 - (x + size / 2);
+      const dy = block.y + block.size / 2 - (y + size / 2);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      return distance < (block.size / 2 + size / 2 + MIN_DISTANCE);
+    });
+  };
+
+  for (let i = 0; i < numStones; i++) {
+    let placed = false;
+    let attempts = 0;
+
+    // Each stone gets its own zone cell
+    const targetZoneX = i % cols;
+    const targetZoneY = Math.floor(i / cols);
+
+    // Pick size from the randomly assigned tier
+    const tier = SIZE_TIERS[tierAssignments[i]];
+
+    while (!placed && attempts < 150) {
+      attempts++;
+
+      const size = Math.floor(Math.random() * (tier.max - tier.min + 1)) + tier.min;
+
+      // Place within zone with small random jitter for organic feel
+      // Increased padding inside zones to force larger separation
+      const padding = 60; 
+      const x = targetZoneX * zoneWidth + padding + Math.random() * Math.max(0, zoneWidth - size - padding * 2);
+      const y = targetZoneY * zoneHeight + padding + Math.random() * Math.max(0, zoneHeight - size - padding * 2);
+
+      if (x >= 0 && y >= 0 && !isOverlapping(x, y, size)) {
+        generatedBlocks.push({ x, y, size });
+        placed = true;
+      }
+    }
+
+    // Fallback — center in zone with medium size
+    if (!placed) {
+      const fallbackSize = (tier.min + tier.max) / 2;
+      generatedBlocks.push({
+        x: targetZoneX * zoneWidth + (zoneWidth - fallbackSize) / 2,
+        y: targetZoneY * zoneHeight + (zoneHeight - fallbackSize) / 2,
+        size: fallbackSize
+      });
+    }
+  }
+
+  // Shuffle for organic stagger order
+  for (let i = generatedBlocks.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [generatedBlocks[i], generatedBlocks[j]] = [generatedBlocks[j], generatedBlocks[i]];
+  }
+
+  return generatedBlocks;
+}
+// Generate blocks to match the exact number of stones
+const blocks = generateScatteredLayout(stonesData.length);
 
 const MIN_ZOOM = 1.0;  // default view is min — can't zoom out below default
 const MAX_ZOOM = 1.6;  // one click from default
 const ZOOM_STEP = 0.6; // single step covers full range
 
 const SwatchHero = () => {
-  // ── Dimensions and Tiling
-  const numRows = Math.ceil(stonesData.length / blocks.length);
-  const totalHeight = PATTERN_HEIGHT * numRows;
+  // ── Dimensions — blocks are 1:1 with stonesData, single layer
+  const totalHeight = PATTERN_HEIGHT;
 
   const [selectedStone, setSelectedStone] = useState<StoneDetail | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -108,8 +122,8 @@ const SwatchHero = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // ── Zoom (Starts at maximum zoom as requested)
-  const [zoomLevel, setZoomLevel] = useState(1.6);
-  const zoomRef = useRef(1.6);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const zoomRef = useRef(1.0);
   zoomRef.current = zoomLevel;
 
   // ── Pan state (synced from drag)
@@ -121,16 +135,15 @@ const SwatchHero = () => {
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ mx: 0, my: 0, panX: 0, panY: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
+  const zoomContainerRef = useRef<HTMLDivElement>(null);
 
   // ── Cursor label state
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [hoveredStone, setHoveredStone] = useState<StoneDetail | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Load at MAX_ZOOM immediately
-  useEffect(() => {
-    setZoomLevel(1.6);
-  }, []);
+  // Zoom level starts at 1.0 so all tiles are visible during pop-in
+  // GSAP will handle the cinematic zoom after tiles finish animating
 
   // Zoom handlers
   const zoomIn = () => setZoomLevel(z => Math.min(+(z + ZOOM_STEP).toFixed(2), MAX_ZOOM));
@@ -139,15 +152,164 @@ const SwatchHero = () => {
     setZoomLevel(next);
   };
 
+  // ── Drag-to-Pop Visibility Check ──
+  const checkVisibility = useCallback(() => {
+    if (!canvasRef.current || !sectionRef.current) return;
+
+    const allTiles = canvasRef.current.querySelectorAll('.granite-tile');
+    if (allTiles.length === 0) return;
+
+    const sectionRect = sectionRef.current.getBoundingClientRect();
+    const threshold = 150;
+    const viewTop = sectionRect.top - threshold;
+    const viewBottom = sectionRect.bottom + threshold;
+    const viewLeft = sectionRect.left - threshold;
+    const viewRight = sectionRect.right + threshold;
+
+    const newlyVisibleTiles: HTMLElement[] = [];
+    const newlyHiddenTiles: HTMLElement[] = [];
+
+    allTiles.forEach((tile) => {
+      const htmlTile = tile as HTMLElement;
+      const rect = htmlTile.getBoundingClientRect();
+      const isVisible = (
+        rect.top < viewBottom &&
+        rect.bottom > viewTop &&
+        rect.left < viewRight &&
+        rect.right > viewLeft
+      );
+
+      const isPopped = htmlTile.getAttribute("data-popped") === "true";
+
+      if (isVisible && !isPopped) {
+        newlyVisibleTiles.push(htmlTile);
+        htmlTile.setAttribute("data-popped", "true");
+      } else if (!isVisible && isPopped) {
+        newlyHiddenTiles.push(htmlTile);
+        htmlTile.setAttribute("data-popped", "false");
+      }
+    });
+
+    if (newlyHiddenTiles.length > 0) {
+      gsap.to(newlyHiddenTiles, {
+        scale: 0,
+        opacity: 0,
+        y: 40,
+        duration: 0.3,
+        ease: "power2.in"
+      });
+    }
+
+    if (newlyVisibleTiles.length > 0) {
+      // Animate them all in with a nice stagger
+      gsap.to(newlyVisibleTiles, {
+        scale: isDraggingRef.current ? 1.05 : 1, // Stay slightly popped if still dragging
+        opacity: 1,
+        y: isDraggingRef.current ? -12 : 0,
+        duration: 0.8, // Slowed down from 0.4
+        stagger: {
+          each: 0.08, // Slowed down stagger from 0.02
+          from: "random"
+        },
+        ease: "back.out(1.4)" // Softened the back-out ease
+      });
+    }
+  }, []);
+
+  // ── GSAP Animation Sequence ──
+  useGSAP(() => {
+    if (!sectionRef.current || !canvasRef.current) return;
+
+    // Select all granite tiles
+    const allTiles = gsap.utils.toArray(".granite-tile") as HTMLElement[];
+    const sectionRect = sectionRef.current.getBoundingClientRect();
+    const threshold = 100;
+
+    const viewTop = sectionRect.top - threshold;
+    const viewBottom = sectionRect.bottom + threshold;
+    const viewLeft = sectionRect.left - threshold;
+    const viewRight = sectionRect.right + threshold;
+
+    const visibleTiles: HTMLElement[] = [];
+
+    allTiles.forEach((tile) => {
+      const rect = tile.getBoundingClientRect();
+      const isVisible = (
+        rect.top < viewBottom &&
+        rect.bottom > viewTop &&
+        rect.left < viewRight &&
+        rect.right > viewLeft
+      );
+
+      if (isVisible) {
+        visibleTiles.push(tile);
+        tile.setAttribute("data-popped", "true");
+      } else {
+        // Hide off-screen tiles initially
+        gsap.set(tile, { scale: 0, opacity: 0, y: 40 });
+      }
+    });
+
+    // Create a timeline
+    const tl = gsap.timeline({
+      defaults: { ease: "back.out(1.7)" }
+    });
+
+    // 1. Staggered pop-in for initially visible tiles ONLY
+    tl.fromTo(
+      visibleTiles,
+      {
+        scale: 0,
+        opacity: 0,
+        y: 40
+      },
+      {
+        scale: 1,
+        opacity: 1,
+        y: 0,
+        duration: 0.3,
+        stagger: {
+          each: 0.04,
+          from: "random"
+        }
+      }
+    )
+      // 2. After initial tiles are done, zoom the entire canvas in
+      .to(
+        canvasRef.current,
+        {
+          scale: 1.5,
+          duration: 1.2,
+          ease: "power2.inOut",
+          onComplete: () => {
+            // Sync React zoom state after GSAP zoom finishes
+            setZoomLevel(1.5);
+            zoomRef.current = 1.5;
+            checkVisibility(); // Final check after zoom completes
+          }
+        }
+      );
+  }, { scope: sectionRef });
+
+  const rafRef = useRef<number | null>(null);
+
   // ── Drag-to-pan handlers (direct DOM mutation — no re-renders during drag)
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Zoom requirement removed so users can pan immediately across the large canvas
     if ((e.target as HTMLElement).closest('button,a')) return;
     isDraggingRef.current = true;
     dragStartRef.current = { mx: e.clientX, my: e.clientY, panX: panRef.current.x, panY: panRef.current.y };
     if (canvasRef.current) {
       canvasRef.current.style.transition = 'none';
       canvasRef.current.style.cursor = 'grabbing';
+      
+      // Interactive pop: slightly scale up and lift all currently popped tiles
+      gsap.to('.granite-tile[data-popped="true"]', {
+        scale: 1.05,
+        y: -12,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto"
+      });
     }
     e.preventDefault();
   }, []);
@@ -166,12 +328,11 @@ const SwatchHero = () => {
     const winW = sectionRef.current?.clientWidth || window.innerWidth;
     const winH = sectionRef.current?.clientHeight || window.innerHeight;
 
-    // Canvas dimensions (5800px width, totalHeight accounts for multiple rows)
+    // Canvas dimensions
     const baseW = window.innerWidth >= 768 ? 5800 : 3800;
     const baseH = totalHeight;
     const s = zoomRef.current;
 
-    // Strict stone boundaries from 106 stones across multiple rows
     const minX = 35 * (baseW / 5800) * s;
     const maxX = 5757 * (baseW / 5800) * s;
     const minY = 23 * s;
@@ -180,11 +341,9 @@ const SwatchHero = () => {
     const halfW = (baseW * s) / 2;
     const halfH = (baseH * s) / 2;
 
-    // x-pan: ensures viewport never drifts beyond the outermost stones
     const xMax = halfW - minX - (winW / 2);
     const xMin = (winW / 2) + halfW - maxX;
 
-    // y-pan: accounts for total multi-row height
     const yMax = halfH - minY - (winH / 2);
     const yMin = (winH / 2) + halfH - maxY;
 
@@ -197,7 +356,13 @@ const SwatchHero = () => {
       canvasRef.current.style.transform =
         `translate(${newX}px, ${newY}px) scale(${zoomRef.current})`;
     }
-  }, [totalHeight]);
+
+    // Throttled visibility check during drag
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      checkVisibility();
+    });
+  }, [totalHeight, checkVisibility]);
 
   const handleMouseUp = useCallback(() => {
     if (!isDraggingRef.current) return;
@@ -208,8 +373,18 @@ const SwatchHero = () => {
     if (canvasRef.current) {
       canvasRef.current.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
       canvasRef.current.style.cursor = '';
+      
+      // Reset the interactive pop back to normal
+      gsap.to('.granite-tile[data-popped="true"]', {
+        scale: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "back.out(1.5)",
+        overwrite: "auto"
+      });
     }
-  }, []);
+    checkVisibility(); // Final check
+  }, [checkVisibility]);
 
   // Sync panX/panY state → DOM when zoom changes (smooth transition)
   useEffect(() => {
@@ -217,7 +392,13 @@ const SwatchHero = () => {
     canvasRef.current.style.transition = 'transform 1.4s cubic-bezier(0.16,1,0.3,1)';
     canvasRef.current.style.transform =
       `translate(${panRef.current.x}px, ${panRef.current.y}px) scale(${zoomLevel})`;
-  }, [zoomLevel]);
+
+    // Because the zoom takes 1.4s, make sure we run check at the end to catch any new tiles
+    const to = setTimeout(() => {
+      checkVisibility();
+    }, 1400);
+    return () => clearTimeout(to);
+  }, [zoomLevel, checkVisibility]);
 
   // Categories for filter
   const categories = ["All", ...Array.from(new Set(stonesData.map(s => s.category)))];
@@ -229,7 +410,7 @@ const SwatchHero = () => {
       className="relative w-full h-screen min-h-[600px] overflow-hidden select-none pt-24 pb-16"
       style={{
         background: "#efefec",
-        cursor: "grab", // Always grabbable so panning the large canvas is obvious
+        cursor: "grab",
       }}
       onMouseMove={handleMouseMove}
       onMouseDown={handleMouseDown}
@@ -281,72 +462,48 @@ const SwatchHero = () => {
         >
           {/* Container maintaining the dynamically tiled aspect ratio - Now hugely expanded */}
           <div
+            ref={zoomContainerRef}
             className="relative w-[3800px] md:w-[5800px] mx-auto"
             style={{ aspectRatio: `${PATTERN_WIDTH} / ${totalHeight}` }}
           >
             {stonesData.map((stone, i) => {
-              const b = blocks[i % blocks.length];
-              const rowOffset = Math.floor(i / blocks.length) * PATTERN_HEIGHT;
+              const b = blocks[i];
+              if (!b) return null;
               const isFilteredOut = activeCategory !== "All" && stone.category !== activeCategory;
               const isSelected = selectedStone?.id === stone.id;
 
-              const stoneVariants = {
-                hidden: { scale: 0.3, opacity: 0 },
-                visible: {
-                  scale: isSelected ? 1.05 : 1,
-                  opacity: isFilteredOut ? 0.15 : 1,
-                  y: isSelected ? -5 : 0,
-                  filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)",
-                  zIndex: isSelected ? 20 : 1
-                },
-                hover: {
-                  scale: 1.02,
-                  y: -5,
-                  boxShadow: "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30)",
-                  zIndex: 10
-                }
-              };
-
               return (
-                <motion.div
+                <div
                   key={i}
-                  className="absolute overflow-hidden cursor-pointer"
-                  variants={stoneVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: false, amount: 0.1 }}
-                  whileHover="hover"
+                  className="absolute overflow-hidden cursor-pointer granite-tile"
                   onClick={() => setSelectedStone(stone)}
                   onMouseEnter={() => setHoveredStone(stone)}
                   onMouseLeave={() => setHoveredStone(null)}
-                  transition={{
-                    duration: 0.6,
-                    delay: i * 0.005,
-                    ease: [0.16, 1, 0.3, 1]
-                  }}
                   style={{
                     left: toPct(b.x, PATTERN_WIDTH),
-                    top: toPct(b.y + rowOffset, totalHeight),
+                    top: toPct(b.y, totalHeight),
                     width: toPct(b.size, PATTERN_WIDTH),
                     height: toPct(b.size, totalHeight),
                     borderRadius: `${radiusFor(b.size)}px`,
-                    // Brighter high-opacity white border
-                    border: isSelected ? "none" : "2px solid rgba(255, 255, 255, 0.82)",
-                    // Enhanced elevation glow + directional shadow + inner glow
+                    border: isSelected ? "none" : "1px solid rgba(200, 200, 200, 0.25)",
+                    // Neomorphism: dark/black shadow on bottom-right only
                     boxShadow: isSelected
-                      ? "12px 12px 28px rgba(0,0,0,0.60), 20px 20px 40px rgba(0,0,0,0.30), 0 0 0 3px #c8a47a"
-                      : "6px 6px 14px rgba(0,0,0,0.40), 0 0 20px rgba(255,255,255,0.22), inset 0 0 15px rgba(255,255,255,0.12)",
+                      ? "10px 10px 20px rgba(0,0,0,0.70), 14px 14px 35px rgba(0,0,0,0.45), 0 0 0 3px #c8a47a"
+                      : "8px 8px 16px rgba(0,0,0,0.55), 12px 12px 30px rgba(0,0,0,0.35)",
                     pointerEvents: isFilteredOut ? "none" : "auto",
-                    willChange: "transform",
+                    willChange: "transform, opacity", // Added opacity for GSAP optimization
+                    // Apply filter directly based on state
+                    filter: isFilteredOut ? "grayscale(100%) blur(2px)" : "grayscale(0%) blur(0px)",
+                    opacity: isFilteredOut ? 0.15 : 1, // GSAP will overwrite this initially but it's good for filter state later
+                    zIndex: isSelected ? 20 : 1,
+                    // hover effects will be handled by CSS or event listeners if needed, for now focusing on intro animation
                   }}
                 >
                   {/* Stone image */}
-                  <motion.img
+                  <img
                     src={stone.image}
                     alt={stone.name}
-                    className="w-full h-full object-cover"
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-110"
                   />
                   {/* Enhanced glass sheen overlay */}
                   <div
@@ -359,7 +516,7 @@ const SwatchHero = () => {
                       borderRadius: "inherit",
                     }}
                   />
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -503,27 +660,35 @@ const SwatchHero = () => {
         </div>
       </div>
 
-      {/* ── Zoom controls — bottom right (Palmer style) ────────────── */}
-      <div className="fixed bottom-8 right-8 z-20 flex items-center gap-4">
-        <span className="text-[12px] text-stone-400 tracking-wide hidden sm:block select-none">
-          ✦ Drag to explore
+      {/* ── Zoom controls — bottom right ────────────── */}
+      <div className="fixed bottom-8 right-8 z-20 flex items-center gap-5">
+        {/* Drag to explore label with crosshair icon */}
+        <span className="flex items-center gap-2 text-[13px] text-stone-400 tracking-wide hidden sm:flex select-none">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="8" y1="1" x2="8" y2="5" />
+            <line x1="8" y1="11" x2="8" y2="15" />
+            <line x1="1" y1="8" x2="5" y2="8" />
+            <line x1="11" y1="8" x2="15" y2="8" />
+            <circle cx="8" cy="8" r="2" />
+          </svg>
+          Drag to explore
         </span>
+
+        {/* − and + buttons */}
         <div className="flex items-center gap-2">
-          {/* − button: white circle, turns dark on press */}
           <button
             onClick={zoomOut}
             disabled={zoomLevel <= MIN_ZOOM}
             aria-label="Zoom out"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 text-xl font-light transition-all duration-150 hover:border-stone-400 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-150 hover:border-stone-400 hover:bg-white active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
           >
             −
           </button>
-          {/* + button: white circle, turns dark on press */}
           <button
             onClick={zoomIn}
             disabled={zoomLevel >= MAX_ZOOM}
             aria-label="Zoom in"
-            className="w-12 h-12 flex items-center justify-center rounded-full border border-stone-300 bg-white text-stone-600 text-xl font-light transition-all duration-150 hover:border-stone-400 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-150 hover:border-stone-400 hover:bg-white active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
           >
             +
           </button>
