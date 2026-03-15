@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="px-6 md:px-10 py-16 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16 mb-14">
           <div>
-            <img src={cosmoLogo} alt="Cosmo" className="h-8 mb-5 brightness-0 invert" />
+            <img src={cosmoLogo} alt="Cosmo Stone Logo" className="h-8 mb-5 brightness-0 invert" />
             <p className="text-sm font-sans text-primary-foreground/50 leading-relaxed max-w-xs">
               Premium natural stone, curated and trusted since 1992.
             </p>
