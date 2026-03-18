@@ -33,15 +33,18 @@ const Navbar = ({ view, onViewChange }: NavbarProps) => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled
         ? "bg-background/95 backdrop-blur-md"
-        : "bg-transparent"
+        : "bg-transparent pointer-events-none"
         }`}
     >
-      <nav className="flex items-center justify-between px-6 md:px-10 h-16 md:h-20">
-        <Link to="/" className="shrink-0 z-10 flex items-center gap-4">
-
-          <img src={cosmoLogo} alt="Cosmo Stone" className="h-8 md:h-10 w-auto" />
+      <nav className="flex items-center justify-between px-6 md:px-10 h-16 md:h-20 pointer-events-auto">
+        <Link to="/" className="shrink-0 z-[110] flex items-center gap-4">
+          <img
+            src={cosmoLogo}
+            alt="Cosmo Stone"
+            className="h-10 md:h-[50px] w-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+          />
         </Link>
 
         {/* Center Toggle - View Switcher */}
