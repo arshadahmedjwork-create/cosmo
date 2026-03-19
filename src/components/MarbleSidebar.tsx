@@ -105,14 +105,16 @@ const MarbleSidebar = ({ stone, onClose }: MarbleSidebarProps) => {
                             </button>
 
                             {/* Request a Sample – secondary */}
-                            <a
-                                href="#contact"
-                                onClick={onClose}
-                                className="flex items-center justify-between px-6 py-3 bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors text-sm tracking-wide"
+                            <button
+                                onClick={() => {
+                                    onClose();
+                                    navigate("/contact");
+                                }}
+                                className="w-full flex items-center justify-between px-6 py-3 bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors text-sm tracking-wide"
                             >
                                 Request a Sample
                                 <ChevronRight size={16} />
-                            </a>
+                            </button>
                         </motion.div>
                     </motion.aside>
                 </>

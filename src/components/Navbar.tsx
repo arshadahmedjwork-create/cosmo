@@ -7,9 +7,10 @@ import TextureSphere from "./TextureSphere";
 interface NavbarProps {
   view: "experience" | "grid";
   onViewChange: (view: "experience" | "grid") => void;
+  hideViewSwitcher?: boolean;
 }
 
-const Navbar = ({ view, onViewChange }: NavbarProps) => {
+const Navbar = ({ view, onViewChange, hideViewSwitcher = false }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -25,47 +26,54 @@ const Navbar = ({ view, onViewChange }: NavbarProps) => {
   }, [location]);
 
   const navLinks = [
-    { label: "Collections", href: "#collections" },
-    { label: "Materials", href: "#materials" },
-    { label: "About", href: "#about" },
-    { label: "Contact", href: "#contact" },
+    { label: "Collections", href: "/#collections" },
+    { label: "Materials", href: "/#materials" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ];
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled
         ? "bg-background/95 backdrop-blur-md"
-        : "bg-transparent"
+        : "bg-transparent pointer-events-none"
         }`}
     >
-      <nav className="flex items-center justify-between px-6 md:px-10 h-16 md:h-20">
-        <Link to="/" className="shrink-0 z-10 flex items-center gap-4">
-
-          <img src={cosmoLogo} alt="Cosmo Stone" className="h-8 md:h-10 w-auto" />
+      <nav className="flex items-center justify-between px-6 md:px-10 h-16 md:h-20 pointer-events-auto">
+        <Link to="/" className="shrink-0 z-[110] flex items-center gap-4">
+          <img
+            src={cosmoLogo}
+            alt="Cosmo Stone"
+            className="h-10 md:h-[50px] w-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]"
+          />
         </Link>
 
         {/* Center Toggle - View Switcher */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm">
-          <button
-            onClick={() => onViewChange("experience")}
-            className={`p-2.5 transition-colors ${view === "experience" ? "bg-[#252525] text-white" : "text-stone-400 hover:text-stone-600"}`}
-            aria-label="Experience View"
-          >
-            <div className="grid grid-cols-2 gap-[2px] w-4 h-4">
-              <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
-              <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
-              <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
-              <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+        {!hideViewSwitcher && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="flex items-center bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm hover:scale-105 hover:shadow-md active:scale-95 transition-all duration-300">
+              <button
+                onClick={() => onViewChange("experience")}
+                className={`p-2.5 transition-colors ${view === "experience" ? "bg-[#252525] text-white" : "text-stone-400 hover:text-stone-600"}`}
+                aria-label="Experience View"
+              >
+                <div className="grid grid-cols-2 gap-[2px] w-4 h-4">
+                  <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+                  <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+                  <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+                  <div className="w-1.5 h-1.5 rounded-full border border-current"></div>
+                </div>
+              </button>
+              <div className="w-[1px] h-4 bg-stone-200" />
+              <button
+                onClick={() => onViewChange("grid")}
+                className={`px-4 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${view === "grid" ? "bg-[#252525] text-white" : "text-stone-600 hover:bg-stone-50"}`}
+              >
+                grid view
+              </button>
             </div>
-          </button>
-          <div className="w-[1px] h-4 bg-stone-200" />
-          <button
-            onClick={() => onViewChange("grid")}
-            className={`px-4 py-2.5 text-[13px] font-medium tracking-wide transition-colors ${view === "grid" ? "bg-[#252525] text-white" : "text-stone-600 hover:bg-stone-50"}`}
-          >
-            grid view
-          </button>
-        </div>
+          </div>
+        )}
 
         {/* Mobile toggle / Fallback right space */}
         <div className="w-10 flex justify-end">
