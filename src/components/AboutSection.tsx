@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import biancoMarfil from "@/assets/images/BEIGES AND CREAM/Bianco-Marfill-min.jpg";
 
 const AboutSection = () => {
@@ -40,12 +41,12 @@ const AboutSection = () => {
               Every slab is hand-selected for its unique character, ensuring
               that each project receives stone of uncompromising quality.
             </p>
-            <a
-              href="#contact"
+            <Link
+              to="/about"
               className="label-text text-foreground border-b border-foreground/30 pb-1 hover:border-foreground transition-colors duration-300 inline-block"
             >
               Learn more about us
-            </a>
+            </Link>
           </motion.div>
         </div>
       </div>

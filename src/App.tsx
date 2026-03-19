@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import MaterialDetail from "./pages/MaterialDetail";
 import CollectionDetail from "./pages/CollectionDetail";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/material/:id" element={<MaterialDetail />} />
           <Route path="/collection/:id" element={<CollectionDetail />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -29,3 +33,4 @@ const App = () => (
 );
 
 export default App;
+

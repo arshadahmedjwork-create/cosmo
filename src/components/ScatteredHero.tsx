@@ -76,7 +76,7 @@ function generateScatteredLayout(numStones: number) {
 
       // Place within zone with small random jitter for organic feel
       // Increased padding inside zones to force larger separation
-      const padding = 60; 
+      const padding = 60;
       const x = targetZoneX * zoneWidth + padding + Math.random() * Math.max(0, zoneWidth - size - padding * 2);
       const y = targetZoneY * zoneHeight + padding + Math.random() * Math.max(0, zoneHeight - size - padding * 2);
 
@@ -301,7 +301,7 @@ const SwatchHero = () => {
     if (canvasRef.current) {
       canvasRef.current.style.transition = 'none';
       canvasRef.current.style.cursor = 'grabbing';
-      
+
       // Interactive pop: slightly scale up and lift all currently popped tiles
       gsap.to('.granite-tile[data-popped="true"]', {
         scale: 1.05,
@@ -373,7 +373,7 @@ const SwatchHero = () => {
     if (canvasRef.current) {
       canvasRef.current.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
       canvasRef.current.style.cursor = '';
-      
+
       // Reset the interactive pop back to normal
       gsap.to('.granite-tile[data-popped="true"]', {
         scale: 1,
@@ -545,6 +545,8 @@ const SwatchHero = () => {
                   className="w-11 h-11 flex items-center justify-center rounded-full bg-[#252525] text-white hover:bg-[#111] transition-colors shadow-sm"
                   initial={{ scale: 0.7, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
                   aria-label="Close menu"
                 >
@@ -554,8 +556,8 @@ const SwatchHero = () => {
                 {/* Nav items with stagger */}
                 {[
                   { label: "collections", href: "#collections", dot: true },
-                  { label: "about", href: "#about", dot: false },
-                  { label: "contact", href: "#contact", dot: false },
+                  { label: "about", href: "/about", dot: false },
+                  { label: "contact", href: "/contact", dot: false },
                 ].map((item, i) => (
                   <motion.a
                     key={item.label}
@@ -564,6 +566,8 @@ const SwatchHero = () => {
                     className="flex items-center gap-1.5 px-5 py-2.5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ delay: 0.06 + i * 0.075, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   >
                     {item.dot && (
@@ -577,16 +581,18 @@ const SwatchHero = () => {
               /* CLOSED STATE ─ ≡ icon  +  menu text  (two separate adjacent buttons) */
               <motion.div
                 key="menu-closed"
-                className="flex items-center gap-0"
+                className="flex items-center gap-0 origin-bottom-left"
                 initial={{ opacity: 0, x: 8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 8 }}
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {/* Hamburger icon — square dark button */}
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="flex items-center justify-center w-11 h-11 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm"
+                  className="flex items-center justify-center w-11 h-11 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-l-sm shadow-sm"
                   aria-label="Open menu"
                 >
                   <Menu size={15} />
@@ -596,7 +602,7 @@ const SwatchHero = () => {
                 {/* 'menu' text — separate dark button */}
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="h-11 px-5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
+                  className="h-11 px-5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-r-sm shadow-sm whitespace-nowrap"
                 >
                   menu
                 </button>
@@ -606,11 +612,11 @@ const SwatchHero = () => {
         </div>
 
         {/* ── Right group: filter icon + filter text (two separate adjacent buttons) ── */}
-        <div className="relative flex items-center gap-0">
+        <div className="relative flex items-center gap-0 hover:scale-105 active:scale-95 transition-all duration-300 origin-bottom-right">
           {/* Filter icon — separate outlined button */}
           <button
             onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
-            className="flex items-center justify-center w-11 h-11 bg-white text-[#252525] hover:bg-stone-50 transition-colors border border-stone-200 rounded-sm shadow-sm"
+            className="flex items-center justify-center w-11 h-11 bg-white text-[#252525] hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 rounded-l-sm shadow-sm"
             aria-label="Toggle filter"
           >
             <Settings2 size={15} />
@@ -620,7 +626,7 @@ const SwatchHero = () => {
           {/* 'filter' text — separate outlined button */}
           <button
             onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
-            className="h-11 px-5 bg-white text-[#252525] text-[13px] font-medium tracking-wide hover:bg-stone-50 transition-colors border border-stone-200 border-l-0 rounded-sm shadow-sm whitespace-nowrap"
+            className="h-11 px-5 bg-white text-[#252525] text-[13px] font-medium tracking-wide hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 border-l-0 rounded-r-sm shadow-sm whitespace-nowrap"
           >
             {activeCategory === "All" ? "filter" : activeCategory}
           </button>
@@ -680,7 +686,7 @@ const SwatchHero = () => {
             onClick={zoomOut}
             disabled={zoomLevel <= MIN_ZOOM}
             aria-label="Zoom out"
-            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-150 hover:border-stone-400 hover:bg-white active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
           >
             −
           </button>
@@ -688,7 +694,7 @@ const SwatchHero = () => {
             onClick={zoomIn}
             disabled={zoomLevel >= MAX_ZOOM}
             aria-label="Zoom in"
-            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-150 hover:border-stone-400 hover:bg-white active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
           >
             +
           </button>
