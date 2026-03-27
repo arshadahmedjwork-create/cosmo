@@ -20,7 +20,7 @@ export const PATTERN_HEIGHT = 5400; // Taller canvas to fit alternating big/smal
 
 // ── Virtual Grid Layout Generation ──
 // Divide the canvas into a grid with enough cells for all stones.
-const MIN_DISTANCE = 350; // Increased spacing
+const MIN_DISTANCE = 450; // Increased spacing for more breathing room
 
 function generateScatteredLayout(numStones: number) {
   const generatedBlocks: { x: number; y: number; size: number; }[] = [];
@@ -112,14 +112,29 @@ const MIN_ZOOM = 1.0;  // default view is min — can't zoom out below default
 const MAX_ZOOM = 1.6;  // one click from default
 const ZOOM_STEP = 0.6; // single step covers full range
 
-const SwatchHero = () => {
+interface SwatchHeroProps {
+  onAnimationComplete?: () => void;
+}
+
+const SwatchHero = ({ onAnimationComplete }: SwatchHeroProps) => {
   // ── Dimensions — blocks are 1:1 with stonesData, single layer
   const totalHeight = PATTERN_HEIGHT;
+
+  // ── UI visibility — hidden until intro animation completes
+  const [showUI, setShowUI] = useState(false);
 
   const [selectedStone, setSelectedStone] = useState<StoneDetail | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // ── Mobile detection for responsive shapes & touch
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // ── Zoom (Starts at maximum zoom as requested)
   const [zoomLevel, setZoomLevel] = useState(1.0);
@@ -145,10 +160,16 @@ const SwatchHero = () => {
   // Zoom level starts at 1.0 so all tiles are visible during pop-in
   // GSAP will handle the cinematic zoom after tiles finish animating
 
+  // ── Zoom behavior based on device
+  const currentMinZoom = isMobile ? 1.4 : MIN_ZOOM;
+  const currentMaxZoom = isMobile ? 3.5 : MAX_ZOOM;
+  const currentZoomStep = isMobile ? 1.05 : ZOOM_STEP;
+  const initialTargetZoom = isMobile ? 3.5 : 1.5;
+
   // Zoom handlers
-  const zoomIn = () => setZoomLevel(z => Math.min(+(z + ZOOM_STEP).toFixed(2), MAX_ZOOM));
+  const zoomIn = () => setZoomLevel(z => Math.min(+(z + currentZoomStep).toFixed(2), currentMaxZoom));
   const zoomOut = () => {
-    const next = Math.max(+(zoomLevel - ZOOM_STEP).toFixed(2), MIN_ZOOM);
+    const next = Math.max(+(zoomLevel - currentZoomStep).toFixed(2), currentMinZoom);
     setZoomLevel(next);
   };
 
@@ -278,14 +299,17 @@ const SwatchHero = () => {
       .to(
         canvasRef.current,
         {
-          scale: 1.5,
+          scale: initialTargetZoom,
           duration: 1.2,
           ease: "power2.inOut",
           onComplete: () => {
             // Sync React zoom state after GSAP zoom finishes
-            setZoomLevel(1.5);
-            zoomRef.current = 1.5;
+            setZoomLevel(initialTargetZoom);
+            zoomRef.current = initialTargetZoom;
             checkVisibility(); // Final check after zoom completes
+            // Show all UI elements now
+            setShowUI(true);
+            onAnimationComplete?.();
           }
         }
       );
@@ -386,6 +410,90 @@ const SwatchHero = () => {
     checkVisibility(); // Final check
   }, [checkVisibility]);
 
+  // ── Touch event handlers for mobile drag-to-pan ──
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('button,a')) return;
+    const touch = e.touches[0];
+    isDraggingRef.current = true;
+    dragStartRef.current = { mx: touch.clientX, my: touch.clientY, panX: panRef.current.x, panY: panRef.current.y };
+    if (canvasRef.current) {
+      canvasRef.current.style.transition = 'none';
+
+      // Interactive pop: slightly scale up and lift all currently popped tiles
+      gsap.to('.granite-tile[data-popped="true"]', {
+        scale: 1.05,
+        y: -12,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto"
+      });
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDraggingRef.current) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - dragStartRef.current.mx;
+    const dy = touch.clientY - dragStartRef.current.my;
+
+    let newX = dragStartRef.current.panX + dx;
+    let newY = dragStartRef.current.panY + dy;
+
+    const winW = sectionRef.current?.clientWidth || window.innerWidth;
+    const winH = sectionRef.current?.clientHeight || window.innerHeight;
+
+    const baseW = window.innerWidth >= 768 ? 5800 : 3800;
+    const baseH = totalHeight;
+    const s = zoomRef.current;
+
+    const minX = 35 * (baseW / 5800) * s;
+    const maxX = 5757 * (baseW / 5800) * s;
+    const minY = 23 * s;
+    const maxY = (totalHeight - 70) * s;
+
+    const halfW = (baseW * s) / 2;
+    const halfH = (baseH * s) / 2;
+
+    const xMax = halfW - minX - (winW / 2);
+    const xMin = (winW / 2) + halfW - maxX;
+
+    const yMax = halfH - minY - (winH / 2);
+    const yMin = (winH / 2) + halfH - maxY;
+
+    newX = Math.max(xMin, Math.min(xMax, newX));
+    newY = Math.max(yMin, Math.min(yMax, newY));
+
+    panRef.current = { x: newX, y: newY };
+    if (canvasRef.current) {
+      canvasRef.current.style.transform =
+        `translate(${newX}px, ${newY}px) scale(${zoomRef.current})`;
+    }
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      checkVisibility();
+    });
+  }, [totalHeight, checkVisibility]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setPanX(panRef.current.x);
+    setPanY(panRef.current.y);
+    if (canvasRef.current) {
+      canvasRef.current.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
+
+      gsap.to('.granite-tile[data-popped="true"]', {
+        scale: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "back.out(1.5)",
+        overwrite: "auto"
+      });
+    }
+    checkVisibility();
+  }, [checkVisibility]);
+
   // Sync panX/panY state → DOM when zoom changes (smooth transition)
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -407,7 +515,7 @@ const SwatchHero = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-screen min-h-[600px] overflow-hidden select-none pt-24 pb-16"
+      className="relative w-full h-screen min-h-[600px] overflow-hidden select-none"
       style={{
         background: "#efefec",
         cursor: "grab",
@@ -416,6 +524,9 @@ const SwatchHero = () => {
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* ── Cursor-following stone name label ─────────────────────── */}
       <AnimatePresence>
@@ -484,12 +595,16 @@ const SwatchHero = () => {
                     top: toPct(b.y, totalHeight),
                     width: toPct(b.size, PATTERN_WIDTH),
                     height: toPct(b.size, totalHeight),
-                    borderRadius: `${radiusFor(b.size)}px`,
+                    borderRadius: isMobile ? '35%' : `${radiusFor(b.size)}px`,
                     border: isSelected ? "none" : "1px solid rgba(200, 200, 200, 0.25)",
-                    // Neomorphism: dark/black shadow on bottom-right only
+                    // Neomorphism shadow — lighter on mobile so background shows through
                     boxShadow: isSelected
-                      ? "10px 10px 20px rgba(0,0,0,0.70), 14px 14px 35px rgba(0,0,0,0.45), 0 0 0 3px #c8a47a"
-                      : "8px 8px 16px rgba(0,0,0,0.55), 12px 12px 30px rgba(0,0,0,0.35)",
+                      ? (isMobile
+                        ? "4px 4px 10px rgba(0,0,0,0.20), 0 0 0 2px #c8a47a"
+                        : "10px 10px 20px rgba(0,0,0,0.70), 14px 14px 35px rgba(0,0,0,0.45), 0 0 0 3px #c8a47a")
+                      : (isMobile
+                        ? "3px 3px 8px rgba(0,0,0,0.15), 5px 5px 15px rgba(0,0,0,0.08)"
+                        : "8px 8px 16px rgba(0,0,0,0.55), 12px 12px 30px rgba(0,0,0,0.35)"),
                     pointerEvents: isFilteredOut ? "none" : "auto",
                     willChange: "transform, opacity", // Added opacity for GSAP optimization
                     // Apply filter directly based on state
@@ -524,7 +639,12 @@ const SwatchHero = () => {
       </div>
 
       {/* ── Bottom Center Controls (Palmer-style expandable menu) ── */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      <motion.div
+        className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 md:gap-2"
+        initial={{ opacity: 0 }}
+        animate={showUI ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
 
         {/* ── Left group: menu toggle ─────────────────────────────── */}
         <div className="flex items-center">
@@ -542,7 +662,7 @@ const SwatchHero = () => {
                 {/* X close button */}
                 <motion.button
                   onClick={() => setIsMenuOpen(false)}
-                  className="w-11 h-11 flex items-center justify-center rounded-full bg-[#252525] text-white hover:bg-[#111] transition-colors shadow-sm"
+                  className="w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-[#252525] text-white hover:bg-[#111] transition-colors shadow-sm"
                   initial={{ scale: 0.7, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   whileHover={{ scale: 1.1 }}
@@ -563,7 +683,7 @@ const SwatchHero = () => {
                     key={item.label}
                     href={item.href}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-1.5 px-5 py-2.5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
+                    className="flex items-center gap-1.5 px-3 md:px-5 py-2 md:py-2.5 bg-[#252525] text-white text-[12px] md:text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-sm shadow-sm whitespace-nowrap"
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     whileHover={{ scale: 1.05 }}
@@ -592,7 +712,7 @@ const SwatchHero = () => {
                 {/* Hamburger icon — square dark button */}
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="flex items-center justify-center w-11 h-11 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-l-sm shadow-sm"
+                  className="flex items-center justify-center w-9 h-9 md:w-11 md:h-11 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-l-sm shadow-sm"
                   aria-label="Open menu"
                 >
                   <Menu size={15} />
@@ -602,7 +722,7 @@ const SwatchHero = () => {
                 {/* 'menu' text — separate dark button */}
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                  className="h-11 px-5 bg-[#252525] text-white text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-r-sm shadow-sm whitespace-nowrap"
+                  className="h-9 md:h-11 px-3 md:px-5 bg-[#252525] text-white text-[12px] md:text-[13px] font-medium tracking-wide hover:bg-[#1a1a1a] transition-colors rounded-r-sm shadow-sm whitespace-nowrap"
                 >
                   menu
                 </button>
@@ -616,7 +736,7 @@ const SwatchHero = () => {
           {/* Filter icon — separate outlined button */}
           <button
             onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
-            className="flex items-center justify-center w-11 h-11 bg-white text-[#252525] hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 rounded-l-sm shadow-sm"
+            className="flex items-center justify-center w-9 h-9 md:w-11 md:h-11 bg-white text-[#252525] hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 rounded-l-sm shadow-sm"
             aria-label="Toggle filter"
           >
             <Settings2 size={15} />
@@ -626,7 +746,7 @@ const SwatchHero = () => {
           {/* 'filter' text — separate outlined button */}
           <button
             onClick={() => { setIsFilterOpen(!isFilterOpen); setIsMenuOpen(false); }}
-            className="h-11 px-5 bg-white text-[#252525] text-[13px] font-medium tracking-wide hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 border-l-0 rounded-r-sm shadow-sm whitespace-nowrap"
+            className="h-9 md:h-11 px-3 md:px-5 bg-white text-[#252525] text-[12px] md:text-[13px] font-medium tracking-wide hover:bg-stone-50 hover:shadow-md transition-all border border-stone-200 border-l-0 rounded-r-sm shadow-sm whitespace-nowrap hidden sm:block"
           >
             {activeCategory === "All" ? "filter" : activeCategory}
           </button>
@@ -664,10 +784,15 @@ const SwatchHero = () => {
             </div>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Zoom controls — bottom right ────────────── */}
-      <div className="fixed bottom-8 right-8 z-20 flex items-center gap-5">
+      <motion.div
+        className="fixed bottom-16 md:bottom-8 right-4 md:right-8 z-20 flex items-center gap-3 md:gap-5"
+        initial={{ opacity: 0 }}
+        animate={showUI ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* Drag to explore label with crosshair icon */}
         <span className="flex items-center gap-2 text-[13px] text-stone-400 tracking-wide hidden sm:flex select-none">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -681,25 +806,25 @@ const SwatchHero = () => {
         </span>
 
         {/* − and + buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <button
             onClick={zoomOut}
-            disabled={zoomLevel <= MIN_ZOOM}
+            disabled={zoomLevel <= currentMinZoom}
             aria-label="Zoom out"
-            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
+            className="w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
           >
             −
           </button>
           <button
             onClick={zoomIn}
-            disabled={zoomLevel >= MAX_ZOOM}
+            disabled={zoomLevel >= currentMaxZoom}
             aria-label="Zoom in"
-            className="w-11 h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
+            className="w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full border border-stone-300 bg-[#f5f5f2] text-stone-500 text-lg font-light transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-stone-400 hover:bg-white active:scale-95 active:bg-[#252525] active:text-white active:border-[#252525] disabled:opacity-30 disabled:scale-100 disabled:cursor-not-allowed"
           >
             +
           </button>
         </div>
-      </div>
+      </motion.div>
 
       <MarbleSidebar stone={selectedStone} onClose={() => setSelectedStone(null)} />
     </section>

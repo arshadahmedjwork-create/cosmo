@@ -201,9 +201,9 @@ const HeroPanel = ({
 }) => {
     const navigate = useNavigate();
     return (
-        <div className="w-screen h-screen flex-shrink-0 flex overflow-hidden" style={{ background: "#d6d6d6" }}>
-            {/* Left – large image */}
-            <div className="w-[50%] h-full relative overflow-hidden">
+        <div className="w-screen h-screen flex-shrink-0 flex flex-col md:flex-row overflow-hidden" style={{ background: "#d6d6d6" }}>
+            {/* Top/Left – large image */}
+            <div className="w-full md:w-[50%] h-[40vh] md:h-full relative overflow-hidden flex-shrink-0">
                 <motion.img
                     src={stone.image}
                     alt={stone.name}
@@ -214,12 +214,12 @@ const HeroPanel = ({
                 />
             </div>
 
-            {/* Right – info */}
-            <div className="w-[50%] h-full flex flex-col justify-between px-12 py-12 relative overflow-hidden">
+            {/* Bottom/Right – info */}
+            <div className="w-full md:w-[50%] flex-1 md:h-full flex flex-col justify-between px-5 py-5 md:px-12 md:py-12 relative overflow-y-auto">
                 {/* Logo */}
                 <button
                     onClick={() => navigate("/")}
-                    className="self-start text-[13px] font-semibold tracking-[0.12em] text-[#3b2a1a] uppercase hover:opacity-70 transition-opacity"
+                    className="self-start text-[13px] font-semibold tracking-[0.12em] text-[#3b2a1a] uppercase hover:opacity-70 transition-opacity mb-3 md:mb-0"
                 >
                     Cosmo
                 </button>
@@ -232,10 +232,10 @@ const HeroPanel = ({
                 >
                     {/* Name */}
                     <h1
-                        className="leading-none mb-5"
+                        className="leading-none mb-3 md:mb-5"
                         style={{
                             fontFamily: "Georgia, 'Times New Roman', serif",
-                            fontSize: "clamp(52px, 7vw, 96px)",
+                            fontSize: "clamp(32px, 7vw, 96px)",
                             color: "#3b2a1a",
                             fontWeight: 400,
                         }}
@@ -244,14 +244,14 @@ const HeroPanel = ({
                     </h1>
 
                     {/* Description */}
-                    <p className="text-sm text-[#3b2a1a]/70 leading-relaxed mb-10 max-w-[420px]">
+                    <p className="text-sm text-[#3b2a1a]/70 leading-relaxed mb-5 md:mb-10 max-w-[420px]">
                         {stone.description}
                     </p>
 
                     {/* Specifications table */}
-                    <div className="mb-10">
+                    <div className="mb-5 md:mb-10">
                         <p
-                            className="text-[11px] uppercase tracking-[0.18em] text-[#3b2a1a]/50 mb-4"
+                            className="text-[11px] uppercase tracking-[0.18em] text-[#3b2a1a]/50 mb-3 md:mb-4"
                             style={{ fontFamily: "system-ui, sans-serif" }}
                         >
                             Specifications
@@ -266,7 +266,7 @@ const HeroPanel = ({
                             ].map(({ label, value }) => (
                                 <div
                                     key={label}
-                                    className="flex justify-between items-center py-3 border-b border-[#3b2a1a]/15"
+                                    className="flex justify-between items-center py-2 md:py-3 border-b border-[#3b2a1a]/15"
                                 >
                                     <span className="text-[12px] text-[#3b2a1a]/50">{label}</span>
                                     <span className="text-[12px] font-medium text-[#3b2a1a]">{value}</span>
@@ -276,11 +276,11 @@ const HeroPanel = ({
                     </div>
 
                     {/* Nav arrows + scroll hint */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 md:gap-4">
                         <button
                             onClick={onBack}
                             disabled={currentPanel === 0}
-                            className="w-9 h-9 border border-[#3b2a1a]/30 flex items-center justify-center hover:border-[#3b2a1a]/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="w-8 h-8 md:w-9 md:h-9 border border-[#3b2a1a]/30 flex items-center justify-center hover:border-[#3b2a1a]/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             aria-label="Previous panel"
                         >
                             <ArrowLeft size={14} color="#3b2a1a" />
@@ -288,19 +288,19 @@ const HeroPanel = ({
                         <button
                             onClick={onNext}
                             disabled={currentPanel === totalPanels - 1}
-                            className="w-9 h-9 border border-[#3b2a1a]/30 flex items-center justify-center hover:border-[#3b2a1a]/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="w-8 h-8 md:w-9 md:h-9 border border-[#3b2a1a]/30 flex items-center justify-center hover:border-[#3b2a1a]/70 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             aria-label="Next panel"
                         >
                             <ArrowRight size={14} color="#3b2a1a" />
                         </button>
-                        <span className="text-[11px] text-[#3b2a1a]/40 tracking-wide ml-2">
+                        <span className="text-[11px] text-[#3b2a1a]/40 tracking-wide ml-1 md:ml-2 hidden sm:inline">
                             Scroll to explore
                         </span>
                     </div>
                 </motion.div>
 
                 {/* Category badge */}
-                <div className="self-start">
+                <div className="self-start mt-3 md:mt-0">
                     <span className="text-[10px] uppercase tracking-[0.18em] text-[#3b2a1a]/40">
                         {stone.category}
                     </span>
@@ -312,9 +312,12 @@ const HeroPanel = ({
 
 // Panel 2: Atmosphere
 const AtmospherePanel = ({ stone }: { stone: StoneEntry }) => (
-    <div className="w-screen h-screen flex-shrink-0 flex overflow-hidden" style={{ background: "#c8c8c8" }}>
-        {/* Left – text area */}
-        <div className="w-[30%] h-full flex items-center justify-start px-12 py-16">
+    <div className="w-screen h-screen flex-shrink-0 flex overflow-hidden relative" style={{ background: "#c8c8c8" }}>
+        {/* Mobile: full-bleed image with text overlay */}
+        {/* Desktop: side-by-side layout */}
+
+        {/* Left – text area (hidden on mobile, shown as overlay instead) */}
+        <div className="hidden md:flex w-[30%] h-full items-center justify-start px-12 py-16">
             <motion.p
                 className="text-sm leading-relaxed max-w-[240px]"
                 style={{ color: "#3b2a1a", fontFamily: "Georgia, serif", fontStyle: "italic" }}
@@ -326,8 +329,8 @@ const AtmospherePanel = ({ stone }: { stone: StoneEntry }) => (
             </motion.p>
         </div>
 
-        {/* Right – full bleed image */}
-        <div className="w-[70%] h-full overflow-hidden relative">
+        {/* Image – full width on mobile, 70% on desktop */}
+        <div className="w-full md:w-[70%] h-full overflow-hidden relative">
             <motion.img
                 src={stone.image}
                 alt={`${stone.name} atmosphere`}
@@ -338,8 +341,25 @@ const AtmospherePanel = ({ stone }: { stone: StoneEntry }) => (
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
             />
             {/* Subtle vignette */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#c8c8c8]/30 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#c8c8c8]/30 via-transparent to-transparent pointer-events-none hidden md:block" />
+            {/* Mobile text overlay at bottom */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none md:hidden" />
         </div>
+
+        {/* Mobile-only text overlay */}
+        <motion.div
+            className="absolute bottom-12 left-5 right-5 md:hidden"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        >
+            <p
+                className="text-sm leading-relaxed text-white/90 max-w-[280px]"
+                style={{ fontFamily: "Georgia, serif", fontStyle: "italic" }}
+            >
+                {stone.atmosphere}
+            </p>
+        </motion.div>
     </div>
 );
 
@@ -357,16 +377,16 @@ const ProductsPanel = ({
 
     return (
         <div
-            className="w-screen h-screen flex-shrink-0 overflow-hidden flex"
+            className="w-screen h-screen flex-shrink-0 overflow-hidden flex flex-col md:flex-row"
             style={{ background: "#c8c8c8" }}
         >
-            {/* Left label */}
-            <div className="w-[28%] flex-shrink-0 h-full flex items-center px-12">
+            {/* Top/Left label */}
+            <div className="w-full md:w-[28%] flex-shrink-0 md:h-full flex items-center px-5 pt-5 pb-3 md:px-12 md:py-0">
                 <motion.h2
                     className="leading-snug"
                     style={{
                         fontFamily: "Georgia, 'Times New Roman', serif",
-                        fontSize: "clamp(24px, 3vw, 38px)",
+                        fontSize: "clamp(20px, 3vw, 38px)",
                         color: "#3b2a1a",
                         fontWeight: 400,
                     }}
@@ -378,9 +398,9 @@ const ProductsPanel = ({
                 </motion.h2>
             </div>
 
-            {/* Right grid */}
-            <div className="flex-1 h-full overflow-y-auto pr-8 pl-4 py-10">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-fr">
+            {/* Bottom/Right grid */}
+            <div className="flex-1 h-full overflow-y-auto px-4 md:pr-8 md:pl-4 py-4 md:py-10">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 auto-rows-fr">
                     {products.map((p, i) => (
                         <motion.button
                             key={p.id}
@@ -397,12 +417,12 @@ const ProductsPanel = ({
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             />
                             {/* Expand icon */}
-                            <div className="absolute top-2 right-2 w-7 h-7 bg-white/70 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute top-2 right-2 w-6 h-6 md:w-7 md:h-7 bg-white/70 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 md:transition-opacity md:duration-300">
                                 <Maximize2 size={12} color="#3b2a1a" />
                             </div>
                             {/* Label */}
-                            <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/30 to-transparent">
-                                <p className="text-[11px] text-white/90 tracking-wide truncate">{p.name}</p>
+                            <div className="absolute bottom-0 left-0 right-0 px-2 md:px-3 py-1.5 md:py-2 bg-gradient-to-t from-black/30 to-transparent">
+                                <p className="text-[10px] md:text-[11px] text-white/90 tracking-wide truncate">{p.name}</p>
                             </div>
                         </motion.button>
                     ))}
@@ -529,26 +549,26 @@ const CollectionDetail = () => {
             </div>
 
             {/* Fixed bottom bar — Menu (always visible) */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center shadow-lg">
+            <div className="fixed bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center shadow-lg">
                 <button
                     onClick={() => navigate("/")}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-sm"
+                    className="flex items-center gap-2 px-4 py-2.5 md:px-6 md:py-3 bg-[#252525] text-white hover:bg-[#1a1a1a] transition-colors rounded-sm"
                 >
                     <Menu size={15} />
-                    <span className="text-[13px] font-medium tracking-wide">menu</span>
+                    <span className="text-[12px] md:text-[13px] font-medium tracking-wide">menu</span>
                 </button>
             </div>
 
             {/* Panel progress indicator */}
-            <div className="fixed bottom-8 right-8 z-50 flex items-center gap-2">
+            <div className="fixed bottom-4 md:bottom-8 right-4 md:right-8 z-50 flex items-center gap-1.5 md:gap-2">
                 {Array.from({ length: totalPanels }).map((_, i) => (
                     <button
                         key={i}
                         onClick={() => setCurrentPanel(i)}
                         className="transition-all duration-500 rounded-full"
                         style={{
-                            width: i === currentPanel ? 28 : 8,
-                            height: 6,
+                            width: i === currentPanel ? 22 : 7,
+                            height: 5,
                             background: i === currentPanel ? "#3b2a1a" : "rgba(59,42,26,0.25)",
                         }}
                         aria-label={`Go to panel ${i + 1}`}

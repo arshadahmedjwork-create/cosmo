@@ -125,7 +125,7 @@ const About = () => {
 
             {/* Floating Glass Card */}
             <motion.div 
-              className="absolute bottom-6 left-6 md:bottom-12 md:left-12 bg-white/80 dark:bg-black/80 backdrop-blur-xl p-8 md:p-10 rounded-lg shadow-2xl max-w-md border border-white/40 transform transition-all duration-700 group-hover:-translate-y-4 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] group-hover:bg-white/95"
+              className="absolute bottom-4 left-4 right-4 md:bottom-12 md:left-12 md:right-auto bg-white/80 dark:bg-black/80 backdrop-blur-xl p-5 md:p-10 rounded-lg shadow-2xl md:max-w-md border border-white/40 transform transition-all duration-700 group-hover:-translate-y-4 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.15)] group-hover:bg-white/95"
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}

@@ -55,7 +55,7 @@ const Contact = () => {
                 <Phone className="w-5 h-5 text-[#a38a59] shrink-0 mt-1 opacity-80" strokeWidth={1.5} />
                 <div className="text-[15px] leading-relaxed">
                   <p><span className="font-semibold text-stone-900">Reception:</span> <span className="text-stone-600">+91 44 48680111 +91 44 48680 222 / 333 / 44</span></p>
-                  <p className="mt-5 whitespace-nowrap text-[14px] sm:text-[15px]"><span className="font-semibold text-stone-900">Mobile & WhatsApp</span> <span className="text-stone-600">+91 9384845224 <span className="text-stone-400 text-[13px] tracking-tight">(For Sales and Support Only)</span></span></p>
+                  <p className="mt-5 text-[14px] sm:text-[15px]"><span className="font-semibold text-stone-900">Mobile & WhatsApp</span> <span className="text-stone-600">+91 9384845224 <span className="text-stone-400 text-[13px] tracking-tight">(For Sales and Support Only)</span></span></p>
                 </div>
               </div>
 
@@ -70,7 +70,7 @@ const Contact = () => {
             </div>
 
             {/* Map Embed */}
-            <div className="w-full h-[320px] bg-stone-200 mt-12 rounded overflow-hidden shadow-sm border border-stone-200">
+            <div className="w-full h-[220px] md:h-[320px] bg-stone-200 mt-8 md:mt-12 rounded overflow-hidden shadow-sm border border-stone-200">
               <iframe
                 src="https://maps.google.com/maps?q=12.9118489,80.2289743&t=&z=14&ie=UTF8&iwloc=&output=embed"
                 width="100%"
