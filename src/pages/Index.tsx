@@ -5,11 +5,16 @@ import StoneGrid from "@/components/StoneGrid";
 
 const Index = () => {
   const [view, setView] = useState<"experience" | "grid">("experience");
+  const [animationComplete, setAnimationComplete] = useState(false);
 
   return (
     <div className="bg-[#f5f5f0] min-h-screen">
-      <Navbar view={view} onViewChange={setView} />
-      {view === "experience" ? <ScatteredHero /> : <StoneGrid />}
+      <Navbar view={view} onViewChange={setView} animationComplete={animationComplete || view === "grid"} />
+      {view === "experience" ? (
+        <ScatteredHero onAnimationComplete={() => setAnimationComplete(true)} />
+      ) : (
+        <StoneGrid />
+      )}
     </div>
   );
 };

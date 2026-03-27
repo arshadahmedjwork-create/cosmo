@@ -48,7 +48,7 @@ const MaterialDetail = () => {
 
   return (
     <div className="bg-background min-h-screen">
-      <Navbar />
+      <Navbar view="grid" onViewChange={() => {}} hideViewSwitcher={true} />
 
       {/* Hero - full width image */}
       <section className="relative w-full h-[75vh] md:h-[85vh] overflow-hidden">
@@ -125,12 +125,12 @@ const MaterialDetail = () => {
                 ))}
               </div>
             </div>
-            <a
-              href="#contact"
+            <Link
+              to="/contact"
               className="label-text bg-primary text-primary-foreground px-7 py-3.5 rounded-sm inline-block hover:opacity-90 transition-opacity duration-300"
             >
               Request Sample
-            </a>
+            </Link>
           </div>
         </div>
       </section>
